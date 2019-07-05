@@ -29,32 +29,34 @@
 // the configuration is set up as a byte stream configuration bytes, commands, and data.
 // The first byte read in a stream indicates whether the following bytes are a command or 
 // data. If the byte is 0, then the next single byte is a command. If the byte is greater
-// than 0, then it indicates the number of following bytes that should be sent as data. This
-// byte sequent can then be repeated to construct longer command and data sequences. 
+// than 0 but less than 255 (0xFF), then it indicates the number of following bytes that 
+// should be sent as data. If the byte is 255 (OxFF), then this library will wait until
+// the ePaper device is ready, as indicated by its BUSY pin going high. This
+// byte sequence can then be repeated to construct longer command and data sequences. 
 // 
-// Given that the data size indicated is an uint8_t, any given data block can only be 
-// 255 bytes in size. if more need to be sent, then just define multiple consecutive 
-// data blocks.
+// Given that the data size indicated is an uint8_t and that 0xFF is reserved, any given data 
+// block can only be 254 bytes in size. if more need to be sent, then just define multiple 
+// consecutive  data blocks.
 
 // MODEL CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
 
-const uint8_t powerOnCommand_CFAP176264A0_0270[] PROGMEM = 
-{
-	
-	0,	0x01,	// panel setting command
-	5,	0x03,	0x00,	0x26,	0x26,	0x03,
-	0,	0x04	// power on command. Always "wait for ready" after this sequence
-};
-const uint8_t powerOnCommandSize_CFAP176264A0_0270 PROGMEM = 10;
 
 const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM = 
 {
+	// panel setting command
+	0,	0x01,	
+	5,	0x03,	0x00,	0x26,	0x26,	0x03,
+	
+	// power on command. Always "wait for ready" after this sequence
+	0,	0x04,
+	0xFF,		// wait for ready
+
 	// booster soft start
-	0,	0x06,	// booster soft start command
+	0,	0x06,
 	3,	0x07,	0x07,	0x07,
 	
 	// power Optimization
-	0,	0xF8,		// send command 0xF8
+	0,	0xF8,
 	2,	0x60,	0xA5,
 	0,	0xF8,
 	2,	0x89,	0xA5,
@@ -85,7 +87,7 @@ const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM =
 	0,	0x61,
 	4,	0x00,	0xB0,	0x01,	0x08
 };
-const uint8_t deviceConfigurationSize_CFAP176264A0_0270 PROGMEM = 53;
+const uint8_t deviceConfigurationSize_CFAP176264A0_0270 PROGMEM = 64;
 
 
 #endif // __Crystalfontz_ePaper_Settings__

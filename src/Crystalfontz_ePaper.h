@@ -41,16 +41,12 @@ private:
 	const int _deviceSizeVertical;
 	const int _deviceSizeHorizontal;
 	
-	const uint8_t *_powerOnSettings;
-	const uint8_t _powerOnSettingsSize;
 	const uint8_t *_configuration;
 	const uint8_t _configurationSize;
 
 	void waitForReady(void) const;
 	void resetDriver(void) const;
 
-	static const uint8_t* powerOnSettings(ePaperDisplay::DEVICE_MODEL model);
-	static uint8_t powerOnSettingsSize(ePaperDisplay::DEVICE_MODEL model);
 	static const uint8_t* deviceConfiguration(ePaperDisplay::DEVICE_MODEL model);
 	static uint8_t deviceConfigurationSize(ePaperDisplay::DEVICE_MODEL model);
 	static int deviceSizeVertical(ePaperDisplay::DEVICE_MODEL model);
@@ -77,6 +73,8 @@ public:
 	void powerUpDevice(void) const;
 
 	ePaperDisplay::DEVICE_MODEL model(void) const			{ return _model; }
+	int	width(void) const									{ return _deviceSizeHorizontal; }
+	int	height(void) const									{ return _deviceSizeVertical; }
 
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,

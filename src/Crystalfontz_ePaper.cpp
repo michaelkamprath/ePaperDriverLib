@@ -37,30 +37,6 @@
 #define DEBUG_PRINTFORMAT(s,f)
 #endif
 
-const uint8_t* ePaperDisplay::powerOnSettings(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return powerOnCommand_CFAP176264A0_0270;
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
-uint8_t ePaperDisplay::powerOnSettingsSize(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return pgm_read_byte(&powerOnCommandSize_CFAP176264A0_0270);
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
 const uint8_t* ePaperDisplay::deviceConfiguration(ePaperDisplay::DEVICE_MODEL model)
 {
 	switch (model) {
@@ -121,8 +97,6 @@ ePaperDisplay::ePaperDisplay(
 		_deviceSelectPin( deviceSelectPin ),
 		_deviceSizeVertical(ePaperDisplay::deviceSizeVertical(model)),
 		_deviceSizeHorizontal(ePaperDisplay::deviceSizeHorizontal(model)),
-		_powerOnSettings(ePaperDisplay::powerOnSettings(model)),
-		_powerOnSettingsSize(ePaperDisplay::powerOnSettingsSize(model)),
 		_configuration(ePaperDisplay::deviceConfiguration(model)),
 		_configurationSize(ePaperDisplay::deviceConfigurationSize(model))
 {
@@ -221,6 +195,9 @@ void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataAr
 			index++;
 			sendCommand(pgm_read_byte(&dataArray[index]));
 			index++;
+		} else if (b == 0xFF ) {
+			waitForReady();
+			index++;
 		} else {
 			// b is and array length. send the next b bytes as dataArray
 			index++;
@@ -236,10 +213,6 @@ void ePaperDisplay::powerUpDevice(void) const
 	DEBUG_PRINTLN("powering up device");
 	DEBUG_PRINTLN("resetting driver");
 	resetDriver();
-	DEBUG_PRINTLN("sending power on configuration");
-	sendCommandAndDataSequenceFromProgMem(_powerOnSettings, _powerOnSettingsSize);
-	DEBUG_PRINTLN("sent power on configuration, waiting for ready");
-	waitForReady();	
 	DEBUG_PRINTLN("sending configuration");
 	sendCommandAndDataSequenceFromProgMem(_configuration, _configurationSize);	
 	DEBUG_PRINTLN("done setting up device.\n");
@@ -282,7 +255,7 @@ void ePaperDisplay::setDeviceImage(
 
 void ePaperDisplay::blankDeviceWhite(void)
 {
-	int totalBytes = _deviceSizeVertical*_deviceSizeHorizontal/8;
+	int totalBytes = width()*height()/8;
 	uint8_t offData = 0x00;
 	
 	sendCommand(0x10);
@@ -300,7 +273,7 @@ void ePaperDisplay::blankDeviceWhite(void)
 }
 
 void ePaperDisplay::blankDeviceBlack(void) {
-	int totalBytes = _deviceSizeVertical*_deviceSizeHorizontal/8;
+	int totalBytes = width()*height()/8;
 	uint8_t offData = 0x00;
 	uint8_t onData = 0xFF;
 	
@@ -319,7 +292,7 @@ void ePaperDisplay::blankDeviceBlack(void) {
 }
 
 void ePaperDisplay::blankDeviceColor(void) {
-	int totalBytes = _deviceSizeVertical*_deviceSizeHorizontal/8;
+	int totalBytes = width()*height()/8;
 	uint8_t offData = 0x00;
 	uint8_t onData = 0xFF;
 	
