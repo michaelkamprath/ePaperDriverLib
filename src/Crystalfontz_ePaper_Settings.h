@@ -38,9 +38,9 @@
 // block can only be 254 bytes in size. if more need to be sent, then just define multiple 
 // consecutive  data blocks.
 
+//
 // MODEL CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
-
-
+//
 const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM = 
 {
 	// panel setting command

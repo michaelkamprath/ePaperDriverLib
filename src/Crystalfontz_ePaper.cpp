@@ -22,12 +22,20 @@
 //     Crystalfontz line of ePaper Displays.
 //
 
+//
+// Some elements of this file were heavily inspired by Adafruit's of their driver for their
+// SSD1306 monochrome device:
+//		https://github.com/adafruit/Adafruit_SSD1306
+// 
+
 #include <Arduino.h>
 #include <SPI.h>
 #include "Crystalfontz_ePaper.h"
 #include "Crystalfontz_ePaper_Settings.h"
 
-#ifdef DEBUG
+#define DEBUG 0
+
+#if DEBUG
 #define DEBUG_PRINTLN(s) Serial.println(s)
 #define DEBUG_PRINT(s) Serial.print(s)
 #define DEBUG_PRINTFORMAT(s,f) Serial.print(s,f)
@@ -36,6 +44,10 @@
 #define DEBUG_PRINT(s)
 #define DEBUG_PRINTFORMAT(s,f)
 #endif
+
+#define swap_coordinates(a, b) \
+  (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b))) ///< No-temp-var swap operation
+
 
 const uint8_t* ePaperDisplay::deviceConfiguration(ePaperDisplay::DEVICE_MODEL model)
 {
@@ -84,26 +96,51 @@ int ePaperDisplay::deviceSizeHorizontal(ePaperDisplay::DEVICE_MODEL model)
 			break;
 	}
 }
+
+bool ePaperDisplay::deviceHasThirdColor(ePaperDisplay::DEVICE_MODEL model)
+{
+	switch (model) {
+		case CFAP176264A0_0270:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
 ePaperDisplay::ePaperDisplay(
 		ePaperDisplay::DEVICE_MODEL model,
 		int deviceReadyPin,
 		int deviceResetPin,
 		int deviceDataCommandPin,
 		int deviceSelectPin
-	) :	_model( model ),
+	) :	Adafruit_GFX(
+				ePaperDisplay::deviceSizeHorizontal(model),
+				ePaperDisplay::deviceSizeVertical(model)
+			),
+		_model( model ),
 		_deviceReadyPin( deviceReadyPin ),
 		_deviceResetPin( deviceResetPin ),
 		_deviceDataCommandPin( deviceDataCommandPin ),
 		_deviceSelectPin( deviceSelectPin ),
-		_deviceSizeVertical(ePaperDisplay::deviceSizeVertical(model)),
-		_deviceSizeHorizontal(ePaperDisplay::deviceSizeHorizontal(model)),
 		_configuration(ePaperDisplay::deviceConfiguration(model)),
-		_configurationSize(ePaperDisplay::deviceConfigurationSize(model))
+		_configurationSize(ePaperDisplay::deviceConfigurationSize(model)),
+		_bufferSize(0),
+		_blackBuffer(nullptr),
+		_colorBuffer(nullptr)
 {
 	pinMode(_deviceSelectPin, OUTPUT);
 	pinMode(_deviceResetPin, OUTPUT);
 	pinMode(_deviceDataCommandPin, OUTPUT);
 	pinMode(_deviceReadyPin, INPUT);
+	
+	_bufferSize = width()*((height()+7)/8);
+	_blackBuffer = (uint8_t *)malloc(_bufferSize);
+	if (ePaperDisplay::deviceHasThirdColor(model)) {
+		_colorBuffer = (uint8_t *)malloc(_bufferSize);
+	}
+	
 	
 	SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 	SPI.begin();
@@ -156,9 +193,8 @@ void ePaperDisplay::sendCommand( uint8_t cmd ) const
 
 void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem ) const
 {
-	DEBUG_PRINTLN("Sending data to device:");
+	DEBUG_PRINTLN("Sending data to device...");
 	digitalWrite(_deviceDataCommandPin, HIGH);
-	DEBUG_PRINT("    0x");
 	for (uint16_t i = 0; i < arraySize; i++ ) {
 		digitalWrite(_deviceSelectPin, LOW);
 		uint8_t data;
@@ -168,19 +204,10 @@ void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool
 			data = dataArray[i];
 		}
 		SPI.transfer(data);
-		if ( i < 32 ) {
-			DEBUG_PRINTFORMAT(data, HEX);
-			if (i < arraySize-1 && i < 32) {
-				DEBUG_PRINT(", 0x");
-			}
-		}
 		digitalWrite(_deviceSelectPin, HIGH);
 		yield();
 	}
-	if ( arraySize >= 32 ) {
-		DEBUG_PRINT(" ..... ");
-	}
-	DEBUG_PRINT("\n");
+	DEBUG_PRINTLN("    Done sending data to device.");
 }
 
 void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataArray, uint16_t arraySize) const
@@ -218,6 +245,121 @@ void ePaperDisplay::powerUpDevice(void) const
 	DEBUG_PRINTLN("done setting up device.\n");
 }
 
+/*!
+    @brief  Clear contents of display buffer (set all pixels to off).
+    @return None (void).
+    @note   Changes buffer contents only, no immediate effect on display.
+            Follow up with a call to display(). Has the effect of setting
+            the screen ePaper_WHITE.
+*/
+void ePaperDisplay::clearDisplay(void)
+{
+	if (_blackBuffer) {
+		memset(_blackBuffer, 0, width()*((height() + 7) / 8));
+	}
+	if (_blackBuffer) {
+		memset(_colorBuffer, 0, width()*((height() + 7) / 8));
+	}
+}
+void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
+{
+	if((x >= 0) && (x < width()) && (y >= 0) && (y < height())) {
+		// Pixel is in-bounds. Rotate coordinates if needed.
+		switch(getRotation()) {
+			case 1:
+				swap_coordinates(x, y);
+				x = WIDTH - x - 1;
+				break;
+			case 2:
+				x = WIDTH  - x - 1;
+				y = HEIGHT - y - 1;
+				break;
+			case 3:
+				swap_coordinates(x, y);
+				y = HEIGHT - y - 1;
+				break;
+		}
+		int16_t buffer_index = (y*WIDTH + x)/8;
+		int8_t buffer_bit_mask = (1 << (7-(y*WIDTH + x)&7));
+		
+		DEBUG_PRINT(F("Setting pixel ( x = "));
+		DEBUG_PRINT(x);
+		DEBUG_PRINT(F(", y = "));
+		DEBUG_PRINT(y);
+		DEBUG_PRINT(F(" ), buffer_index = "));
+		DEBUG_PRINT(buffer_index);
+		DEBUG_PRINT(F(", buffer_bit_mask = 0x"));
+		DEBUG_PRINTFORMAT(buffer_bit_mask, HEX);
+		DEBUG_PRINT(F("\n"));
+		
+		switch(color) {
+			case ePaper_WHITE:
+				// setting white is turning the black pixel off
+				_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
+				if (_colorBuffer) {
+					// turn the color off where we set white
+					_colorBuffer[buffer_index] &= ~(buffer_bit_mask); 
+				}
+				
+				break;
+			case ePaper_BLACK:
+				// turn appropriate black pixel on
+				_blackBuffer[buffer_index] |=  (buffer_bit_mask);
+				if (_colorBuffer) {
+					// turn the color off where we set black
+					_colorBuffer[buffer_index] &= ~(buffer_bit_mask); 
+				}
+				break;
+			case ePaper_COLOR:
+				// make sure black pixel is off
+				_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
+				if (_colorBuffer) {
+					// turn the color on 
+					_colorBuffer[buffer_index] |=  (buffer_bit_mask);
+				}
+				break;
+			case ePaper_INVERSE:
+				// to set the inverse, first see if the pixel has the color. If it does,
+				// invert that (set to white). Otherwise, invert the B&W image.
+				if (_colorBuffer) {
+					if (_colorBuffer[buffer_index]&buffer_bit_mask) {
+						_colorBuffer[buffer_index] &= ~(buffer_bit_mask); 
+						break;
+					}
+				}
+				_blackBuffer[buffer_index] ^= buffer_bit_mask;
+				break;
+			default:
+				// what color is this?
+				break;			
+		}
+	}
+	yield();
+}
+
+/*!
+    @brief  Pushes the current image buffer contents to the ePaper device.
+    @return None (void).
+    @note   Pushes the current buffer contents to the ePaper device, and then triggers
+    		a display refresh. This function does not return until the display refresh 
+    		has completed.
+*/
+void ePaperDisplay::display(void)
+{
+	if ( _blackBuffer != nullptr ) {
+		sendCommand(0x10);
+		sendData(_blackBuffer, _bufferSize, false);
+		yield();
+	}
+	if ( _colorBuffer != nullptr ) {
+		sendCommand(0x13);
+		sendData(_colorBuffer, _bufferSize, false);
+		yield();
+	}
+	
+	sendCommand(0x12);
+	waitForReady();
+}
 void ePaperDisplay::setDeviceImage( 
 	const uint8_t* blackBitMap,
 	uint16_t blackBitMapSize,
@@ -236,77 +378,19 @@ void ePaperDisplay::setDeviceImage(
 	bool colorBitMapIsProgMem
 )
 {
-	DEBUG_PRINTLN("\nsending new bitmap");
-	if ( blackBitMap != nullptr ) {
-		sendCommand(0x10);
-		sendData(blackBitMap, blackBitMapSize, blackBitMapIsProgMem);
-		yield();
+	if (blackBitMap && _blackBuffer && (blackBitMapSize <= _bufferSize)) {
+		if (blackBitMapIsProgMem) {
+			memcpy_P(_blackBuffer, blackBitMap, blackBitMapSize);
+		} else {
+			memcpy(_blackBuffer, blackBitMap, blackBitMapSize);
+		}
 	}
-	if ( colorBitMap != nullptr ) {
-		sendCommand(0x13);
-		sendData(colorBitMap, colorBitMapSize, colorBitMapIsProgMem);
-		yield();
+	if (colorBitMap && _colorBuffer && (colorBitMapSize <= _bufferSize)) {
+		if (blackBitMapIsProgMem) {
+			memcpy_P(_colorBuffer, colorBitMap, colorBitMapSize);
+		} else {
+			memcpy(_colorBuffer, colorBitMap, colorBitMapSize);
+		}
 	}
-	
-	sendCommand(0x12);
-	waitForReady();
-	DEBUG_PRINTLN("bitmap has been sent!");
-}
-
-void ePaperDisplay::blankDeviceWhite(void)
-{
-	int totalBytes = width()*height()/8;
-	uint8_t offData = 0x00;
-	
-	sendCommand(0x10);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&offData, 1, false);
-		yield();
-	}
-	sendCommand(0x13);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&offData, 1, false);
-		yield();
-	}
-	sendCommand(0x12);
-	waitForReady();
-}
-
-void ePaperDisplay::blankDeviceBlack(void) {
-	int totalBytes = width()*height()/8;
-	uint8_t offData = 0x00;
-	uint8_t onData = 0xFF;
-	
-	sendCommand(0x10);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&onData, 1, false);
-		yield();
-	}
-	sendCommand(0x13);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&offData, 1, false);
-		yield();
-	}
-	sendCommand(0x12);
-	waitForReady();
-}
-
-void ePaperDisplay::blankDeviceColor(void) {
-	int totalBytes = width()*height()/8;
-	uint8_t offData = 0x00;
-	uint8_t onData = 0xFF;
-	
-	sendCommand(0x10);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&offData, 1, false);
-		yield();
-	}
-	sendCommand(0x13);
-	for (int i = 0; i < totalBytes; i++ ) {
-		sendData(&onData, 1, false);
-		yield();
-	}
-	sendCommand(0x12);
-	waitForReady();
 }
 

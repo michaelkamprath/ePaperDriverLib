@@ -23,8 +23,15 @@
 //
 #ifndef __Crystalfontz_ePaper__
 #define __Crystalfontz_ePaper__
+#include <Adafruit_GFX.h>
 
-class ePaperDisplay {
+// these are the color values supported
+#define ePaper_WHITE	0
+#define ePaper_BLACK	1
+#define ePaper_COLOR	2		// used if the ePaper display ahs a third color
+#define ePaper_INVERSE	3
+
+class ePaperDisplay : public Adafruit_GFX {
 public:
 	typedef enum {
 		// model: CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
@@ -32,18 +39,21 @@ public:
 	
 	} DEVICE_MODEL;
 
+	
 private:
 	const DEVICE_MODEL _model;
 	const int _deviceReadyPin;
 	const int _deviceResetPin;
 	const int _deviceDataCommandPin;
 	const int _deviceSelectPin;
-	const int _deviceSizeVertical;
-	const int _deviceSizeHorizontal;
 	
 	const uint8_t *_configuration;
 	const uint8_t _configurationSize;
 
+	uint16_t _bufferSize;
+	uint8_t *_blackBuffer;
+	uint8_t *_colorBuffer;
+	
 	void waitForReady(void) const;
 	void resetDriver(void) const;
 
@@ -51,6 +61,7 @@ private:
 	static uint8_t deviceConfigurationSize(ePaperDisplay::DEVICE_MODEL model);
 	static int deviceSizeVertical(ePaperDisplay::DEVICE_MODEL model);
 	static int deviceSizeHorizontal(ePaperDisplay::DEVICE_MODEL model);
+	static bool deviceHasThirdColor(ePaperDisplay::DEVICE_MODEL model);
 	
 protected:
 	void sendCommand( uint8_t cmd ) const;
@@ -73,9 +84,22 @@ public:
 	void powerUpDevice(void) const;
 
 	ePaperDisplay::DEVICE_MODEL model(void) const			{ return _model; }
-	int	width(void) const									{ return _deviceSizeHorizontal; }
-	int	height(void) const									{ return _deviceSizeVertical; }
 
+	//
+	// Adafruit GFX support
+	//
+	
+	virtual void drawPixel(int16_t x, int16_t y, uint16_t color);
+	
+
+	
+	//
+	//
+	//
+	
+	void display(void);
+	void clearDisplay(void);
+	
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,
 				uint16_t blackBitMapSize,
@@ -90,11 +114,7 @@ public:
 				uint16_t colorBitMapSize,
 				bool colorBitMapIsProgMem
 			);
-	
-	void blankDeviceWhite(void);
-	void blankDeviceBlack(void);
-	void blankDeviceColor(void);
-	
+		
 };
 
 #endif // __Crystalfontz_ePaper__
