@@ -6,7 +6,7 @@ This library supports the following colors in the GFX:
 * `ePaper_WHITE` - Sets the pixel white
 * `ePaper_BLACK` - Sets the pixel black
 * `ePaper_COLOR` - If the ePaper device supports a third color (e.g., red), sets the pixel to that color.
-* `ePaper_INVERSE` - If the pixel is currently white, set it black, and vide vera. If the pixel is currently the device's third color, set it white.
+* `ePaper_INVERSE` - If the pixel is currently white, set it black, and vice versa. If the pixel is currently the device's third color, set it white.
 
 These color constants are defined in the `Crystalfontz_ePaper.h` header.
 
