@@ -254,12 +254,7 @@ void ePaperDisplay::powerUpDevice(void) const
 */
 void ePaperDisplay::clearDisplay(void)
 {
-	if (_blackBuffer) {
-		memset(_blackBuffer, 0, width()*((height() + 7) / 8));
-	}
-	if (_blackBuffer) {
-		memset(_colorBuffer, 0, width()*((height() + 7) / 8));
-	}
+	fillScreen(ePaper_WHITE);
 }
 void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
 {
@@ -318,7 +313,8 @@ void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
 					_colorBuffer[buffer_index] |=  (buffer_bit_mask);
 				}
 				break;
-			case ePaper_INVERSE:
+			case ePaper_INVERSE1:
+				// b -> w, w -> b, c -> w
 				// to set the inverse, first see if the pixel has the color. If it does,
 				// invert that (set to white). Otherwise, invert the B&W image.
 				if (_colorBuffer) {
@@ -329,6 +325,46 @@ void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
 				}
 				_blackBuffer[buffer_index] ^= buffer_bit_mask;
 				break;
+			case ePaper_INVERSE2:
+				// b -> c or w, w -> b, c -> b
+				if (_colorBuffer) {
+					if (_colorBuffer[buffer_index]&buffer_bit_mask) {
+						_colorBuffer[buffer_index] &= ~(buffer_bit_mask); 
+						_blackBuffer[buffer_index] |= buffer_bit_mask;
+						break;
+					}
+				}
+				if (_blackBuffer[buffer_index]&buffer_bit_mask) {
+					_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
+					if (_colorBuffer) {
+						_colorBuffer[buffer_index] |= buffer_bit_mask;
+					}
+				}
+				else {
+					_blackBuffer[buffer_index] |= buffer_bit_mask;
+				}
+				break;
+			case ePaper_INVERSE3:
+				// b -> w, w -> c or b, c -> b
+				if (_colorBuffer) {
+					if (_colorBuffer[buffer_index]&buffer_bit_mask) {
+						_colorBuffer[buffer_index] &= ~(buffer_bit_mask); 
+						_blackBuffer[buffer_index] |= buffer_bit_mask;
+						break;
+					}
+				}
+				if (_blackBuffer[buffer_index]&buffer_bit_mask) {
+					_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
+				}
+				else {
+					if (_colorBuffer) {
+						_colorBuffer[buffer_index] |= buffer_bit_mask;
+					}
+					else {
+						_blackBuffer[buffer_index] |= buffer_bit_mask;
+					}
+				}
+				break;
 			default:
 				// what color is this?
 				break;			
@@ -336,6 +372,38 @@ void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
 	}
 	yield();
 }
+
+void ePaperDisplay::fillScreen(uint16_t color)
+{
+	uint8_t blackByte = 0;
+	uint8_t colorByte = 0;
+
+	switch (color) {
+		case ePaper_WHITE:
+			break;
+		case ePaper_BLACK:
+			blackByte = 0xFF;
+			break;
+		case ePaper_COLOR:
+			colorByte = 0xFF;
+			break;
+		default:
+		case ePaper_INVERSE1:
+		case ePaper_INVERSE2:
+		case ePaper_INVERSE3:
+			Adafruit_GFX::fillScreen(color);
+			return;
+			break;
+	}
+
+	if (_blackBuffer) {
+		memset(_blackBuffer, blackByte, _bufferSize);
+	}
+	if (_colorBuffer) {
+		memset(_colorBuffer, colorByte, _bufferSize);
+	}
+}
+
 
 /*!
     @brief  Pushes the current image buffer contents to the ePaper device.

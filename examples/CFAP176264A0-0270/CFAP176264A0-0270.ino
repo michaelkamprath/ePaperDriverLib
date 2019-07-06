@@ -61,7 +61,7 @@ void loop() {
 	//
 	
 	device->setFont(&FreeSansBold18pt7b);
-	device->setTextColor(ePaper_INVERSE);
+	device->setTextColor(ePaper_INVERSE1);
 	device->setRotation(1);
 	device->clearDisplay();
 	device->fillTriangle(

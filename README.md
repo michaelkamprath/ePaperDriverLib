@@ -29,7 +29,9 @@ Here, ESP8266 pin naming is used. Change as you need. The rest of the ePaper dev
 ## Requirements
 The following Arduino libraries are required to make this library work: 
 
-* [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
+* [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library) - Learn more how to use GFX [here](https://learn.adafruit.com/adafruit-gfx-graphics-library/).
+
+This library uses a RAM buffer to manage the screen image. As such, this library can be a RAM hog for larger ePaper displays. The amount of ram needed can be calculated by multiple the device's dimensions and then dividing by 8. If the device has a third color, double the RAM needs. For example, the `CFAP176264A0-0270` device has the dimensions of 176 by 264, and it has three colors. This means it's RAM buffer will need 11,616 bytes. Ensure that you are using a microcontroller that can handle the RAM needs of your board.
 
 # Disclaimer 
 

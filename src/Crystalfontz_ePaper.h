@@ -29,7 +29,10 @@
 #define ePaper_WHITE	0
 #define ePaper_BLACK	1
 #define ePaper_COLOR	2		// used if the ePaper display ahs a third color
-#define ePaper_INVERSE	3
+#define ePaper_INVERSE1	3		// b -> w, w -> b, c -> w
+#define ePaper_INVERSE2	4		// b -> c or w, w -> b, c -> b
+#define ePaper_INVERSE3	5		// b -> w, w -> c or b, c -> b
+
 
 class ePaperDisplay : public Adafruit_GFX {
 public:
@@ -91,7 +94,7 @@ public:
 	
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color);
 	
-
+	virtual void fillScreen(uint16_t color);
 	
 	//
 	//
