@@ -395,11 +395,34 @@ void ePaperDisplay::fillScreen(uint16_t color)
 			break;
 	}
 
+	startWrite();
 	if (_blackBuffer) {
 		memset(_blackBuffer, blackByte, _bufferSize);
 	}
 	if (_colorBuffer) {
 		memset(_colorBuffer, colorByte, _bufferSize);
+	}
+	endWrite();
+}
+
+/*!
+    @brief      Invert the display. For B&W displays, this just swaps white and black.
+    			For three color displays, this swaps black pixels with color pixels & vice versa.
+    			Note that white pixels remain the same in this case.
+    @param   i  True if you want to invert, false to make 'normal'
+*/
+void  ePaperDisplay::invertDisplay(boolean i)
+{
+	if (!i) return;
+	
+	if (_colorBuffer != nullptr) {
+		startWrite();
+		uint8_t *tempPtr = _colorBuffer;
+		_colorBuffer = _blackBuffer;
+		_blackBuffer = tempPtr;
+		endWrite();
+	} else {
+		fillScreen(ePaper_INVERSE1);
 	}
 }
 
@@ -413,12 +436,12 @@ void ePaperDisplay::fillScreen(uint16_t color)
 */
 void ePaperDisplay::display(void)
 {
-	if ( _blackBuffer != nullptr ) {
+	if (_blackBuffer != nullptr) {
 		sendCommand(0x10);
 		sendData(_blackBuffer, _bufferSize, false);
 		yield();
 	}
-	if ( _colorBuffer != nullptr ) {
+	if (_colorBuffer != nullptr) {
 		sendCommand(0x13);
 		sendData(_colorBuffer, _bufferSize, false);
 		yield();
@@ -427,6 +450,17 @@ void ePaperDisplay::display(void)
 	sendCommand(0x12);
 	waitForReady();
 }
+
+/*!
+    @brief  Sets the device image buffer directly. 
+    @param	blackBitMap		the bitmap to set the bit and white image to. High (1) values set
+    						the pixel black, low (0) sets the pixel white. 
+    @param	blackBitMapSize	the size of the black bitmap in total bytes.
+    @param	blackBitMapIsProgMem	indicates whether the passed bitmap resides in PROGMEM or not.
+    @return None (void).
+    @note   Since this sets the image buffer directly, the bit map must be correctly sized
+    		for the device's demensions. Also, any rotation that has been set is ignored. 
+*/
 void ePaperDisplay::setDeviceImage( 
 	const uint8_t* blackBitMap,
 	uint16_t blackBitMapSize,
@@ -436,6 +470,20 @@ void ePaperDisplay::setDeviceImage(
 	setDeviceImage(blackBitMap, blackBitMapSize, blackBitMapIsProgMem, nullptr, 0, false);
 }
 
+/*!
+    @brief  Sets the device image buffers directly. 
+    @param	blackBitMap		the bitmap to set the black and white image to. High (1) values set
+    						the pixel black, low (0) sets the pixel white. may be null.
+    @param	blackBitMapSize	the size of the black bitmap in total bytes.
+    @param	blackBitMapIsProgMem	indicates whether the passed bitmap resides in PROGMEM or not.
+    @param	colorBitMap		the bitmap to set the color image to. High (1) values set
+    						the pixel colored, low (0) sets the uncolored. 
+    @param	colorBitMapSize	the size of the color bitmap in total bytes.
+    @param	colorBitMapIsProgMem	indicates whether the passed bitmap resides in PROGMEM or not.
+    @return None (void).
+    @note   Since this sets the image buffers directly, the bit map must be correctly sized
+    		for the device's demensions. Also, any rotation that has been set is ignored. 
+*/
 void ePaperDisplay::setDeviceImage( 
 	const uint8_t* blackBitMap,
 	uint16_t blackBitMapSize,

@@ -94,6 +94,7 @@ public:
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color);
 	
 	virtual void fillScreen(uint16_t color);
+	virtual void invertDisplay(boolean i);
 	
 	//
 	//

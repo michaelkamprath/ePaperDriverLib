@@ -48,6 +48,12 @@ void loop() {
 		centerX + 2*radius*sin(PI/3.0)*sin(PI/6.0), centerY + radius*(2.0*sin(PI/3.0)*sin(PI/3.0)-1.0),  
 		ePaper_BLACK		
 	);
+	device->fillTriangle(
+		centerX, centerY + radius*(2.0*sin(PI/3.0)*sin(PI/3.0)-1.0),
+		centerX - radius*sin(PI/6.0)*sin(PI/3.0), centerY - radius*(1.0-sin(PI/3.0)*sin(PI/3.0)),
+		centerX + radius*sin(PI/6.0)*sin(PI/3.0), centerY - radius*(1.0-sin(PI/3.0)*sin(PI/3.0)),  
+		ePaper_WHITE		
+	);
 	
 	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
 	device->setCursor(centerX-w/2, device->height() - 8);
