@@ -1,4 +1,4 @@
-#include "Crystalfontz_ePaper.h"
+#include "ePaperDriver.h"
 #include "CrystalfontzDemoImage.h"
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSansBold18pt7b.h>

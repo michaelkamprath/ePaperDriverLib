@@ -1,14 +1,14 @@
-//     Crystalfontz ePaper Display Lib for Arduino Project
+//     ePaper Driver Lib for Arduino Project
 //     Copyright (C) 2019 Michael Kamprath
 //
 //     This file is part of Crystalfontz ePaper Display Lib for Arduino Project.
 // 
-//     Crystalfontz ePaper Display Lib for Arduino Project is free software: you can 
+//     ePaper Driver Lib for Arduino Project is free software: you can 
 //	   redistribute it and/or modify it under the terms of the GNU General Public License
 //     as published by the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 // 
-//     Crystalfontz ePaper Display Lib for Arduino Project is distributed in the hope that 
+//     ePaper Driver Lib for Arduino Project is distributed in the hope that 
 // 	   it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 //     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //     GNU General Public License for more details.
@@ -16,13 +16,12 @@
 //     You should have received a copy of the GNU General Public License
 //     along with Shift Register LED Matrix Project.  If not, see <http://www.gnu.org/licenses/>.
 //
-//     This project and its creators are not associated with Crystalfontz, nor is this 
-//     project officially endorsed or reviewed for correctness by Crystalfontz. This 
-//     project is an open source effort by the community to make a usable library for the
-//     Crystalfontz line of ePaper Displays.
+//     This project and its creators are not associated with Crystalfontz, Good display
+//	   or any other manufacturer, nor is this  project officially endorsed or reviewed for 
+//	   correctness by any ePaper manufacturer. 
 //
-#ifndef __Crystalfontz_ePaper_Settings__
-#define __Crystalfontz_ePaper_Settings__
+#ifndef __ePaperSettings_Crystalfontz__
+#define __ePaperSettings_Crystalfontz__
 // This file contains all the device specific look up tables and configurations for the 
 // ePaper devices this library supports. 
 
@@ -90,4 +89,4 @@ const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM =
 const uint8_t deviceConfigurationSize_CFAP176264A0_0270 PROGMEM = 64;
 
 
-#endif // __Crystalfontz_ePaper_Settings__
+#endif // __ePaperSettings_Crystalfontz__

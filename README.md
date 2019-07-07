@@ -1,5 +1,5 @@
-# Crystalfontz_ePaper_lib
-An unofficial Arduino library for the Crystalfontz ePaper line of displays. This library implements the Adafruit GFX interface, providing the Arduino community a familiar API for manipulating the pixels on the screen.  This library is currently designed to only support SPI communications with the ePaper device.
+# ePaper Driver Lib
+An unofficial Arduino library for ePaper displays from various manufacturers and distributers. This library implements the Adafruit GFX interface, providing the Arduino community a familiar API for manipulating the pixels on the screen.  This library is currently designed to only support SPI communications with the ePaper device.
 
 This library supports the following colors in the GFX:
 
@@ -8,7 +8,7 @@ This library supports the following colors in the GFX:
 * `ePaper_COLOR` - If the ePaper device supports a third color (e.g., red), sets the pixel to that color.
 * `ePaper_INVERSE` - If the pixel is currently white, set it black, and vice versa. If the pixel is currently the device's third color, set it white.
 
-These color constants are defined in the `Crystalfontz_ePaper.h` header.
+These color constants are defined in the `ePaperDriver.h` header.
 
 To initialize an ePaper device object, you simply declare it as follows:
 ```
@@ -24,7 +24,8 @@ Here, ESP8266 pin naming is used. Change as you need. The rest of the ePaper dev
 
 ## Supported Models
 
-* **[CFAP176264A0-0270](https://www.crystalfontz.com/product/cfap176264a00270-3-color-epaper-display)** - 2.7 inch 3-color ePaper display
+* Crystalfontz
+    * **[CFAP176264A0-0270](https://www.crystalfontz.com/product/cfap176264a00270-3-color-epaper-display)** - 2.7 inch 3-color ePaper display
 
 ## Requirements
 The following Arduino libraries are required to make this library work: 
@@ -35,4 +36,4 @@ This library uses a RAM buffer to manage the screen image. As such, this library
 
 # Disclaimer 
 
-This project and its creators are not associated with Crystalfontz or Adafruit, nor is this project officially endorsed or reviewed for correctness by Crystalfontz or Adafruit. This project is an open source effort by the community to make a usable library for the Crystalfontz line of ePaper Displays.
+This project and its creators are not associated with any ePaper manufacturer or Adafruit, nor is this project officially endorsed or reviewed for correctness by any ePaper manufacturer. This project is an open source effort by the community to make a usable library for ePaper displays.
