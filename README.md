@@ -28,7 +28,11 @@ Here, ESP8266 pin naming is used. Change as you need. The rest of the ePaper dev
 ## Supported Models
 
 * Crystalfontz
+    * **[CFAP104212E0-0213](https://www.crystalfontz.com/product/cfap104212e00213-yellow-black-white-epaper-display)** - 2.13 inch 3-color ePaper display - yellow
+    * **[CFAP104212C0-0213](https://www.crystalfontz.com/product/cfap104212c00213-epaper-eink-color-display)** - 2.13 inch 3-color ePaper display - red
     * **[CFAP176264A0-0270](https://www.crystalfontz.com/product/cfap176264a00270-3-color-epaper-display)** - 2.7 inch 3-color ePaper display
+    * **[CFAP400300C0-0420](https://www.crystalfontz.com/product/cfap400300c00420-400x300-3-color-epaper-display)** - 4.2" 3-Color ePaper Display - yellow
+    * **[CFAP400300A0-0420](https://www.crystalfontz.com/product/cfap400300a00420-3-color-4-inch-epaper-display)** - 4.2" 3-Color ePaper Display - red
 
 ## Requirements
 The following Arduino libraries are required to make this library work: 
