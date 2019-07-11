@@ -1,15 +1,15 @@
 #include "ePaperDriver.h"
 #include "CrystalfontzDemoImage.h"
-#include <Fonts/FreeSansBoldOblique12pt7b.h>
+#include <Fonts/Picopixel.h>
 #include <Fonts/FreeSansBold18pt7b.h>
 
 ePaperDisplay *device;
 
 void setup() {
 #if defined( ESP8266 )
-	device = new ePaperDisplay( CFAP176264A0_0270, D1, D2, D3, D8 );
+	device = new ePaperDisplay( CFAP104212E0_0213, D1, D2, D3, D8 );
 #else
-	device = new ePaperDisplay( CFAP176264A0_0270, 3, 4, 5, 10 );
+	device = new ePaperDisplay( CFAP104212E0_0213, 3, 4, 5, 10 );
 #endif
 	device->initializeDevice();	
 }
@@ -20,8 +20,8 @@ void loop() {
 	//
 	device->powerOn();
 	device->setDeviceImage(
-	  Splash_Mono_1BPP, 5808, true,
-	  Splash_Red_1BPP, 5808, true
+	  Splash_Mono_1BPP, 2756, true,
+	  Splash_Yellow_1BPP, 2756, true
 	);
 	device->refreshDisplay();
 	device->powerOff();
@@ -31,7 +31,7 @@ void loop() {
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
 	device->powerOn();
-	device->setFont(&FreeSansBoldOblique12pt7b);
+	device->setFont(&Picopixel);
 	device->setTextColor(ePaper_BLACK);
 	device->setRotation(0);
 	

@@ -23,6 +23,7 @@
 #ifndef __ePaperDriver__
 #define __ePaperDriver__
 #include <Adafruit_GFX.h>
+#include "ePaperDeviceModels.h"
 
 // these are the color values supported
 #define ePaper_WHITE	0
@@ -35,15 +36,10 @@
 
 class ePaperDisplay : public Adafruit_GFX {
 public:
-	typedef enum {
-		// model: CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
-		CFAP176264A0_0270
-	
-	} DEVICE_MODEL;
 
 	
 private:
-	const DEVICE_MODEL _model;
+	const ePaperDeviceModel _model;
 	const int _deviceReadyPin;
 	const int _deviceResetPin;
 	const int _deviceDataCommandPin;
@@ -58,12 +54,6 @@ private:
 	
 	void waitForReady(void) const;
 	void resetDriver(void) const;
-
-	static const uint8_t* deviceConfiguration(ePaperDisplay::DEVICE_MODEL model);
-	static uint8_t deviceConfigurationSize(ePaperDisplay::DEVICE_MODEL model);
-	static int deviceSizeVertical(ePaperDisplay::DEVICE_MODEL model);
-	static int deviceSizeHorizontal(ePaperDisplay::DEVICE_MODEL model);
-	static bool deviceHasThirdColor(ePaperDisplay::DEVICE_MODEL model);
 	
 protected:
 	void sendCommand( uint8_t cmd ) const;
@@ -74,7 +64,7 @@ protected:
 public:
 
 	ePaperDisplay(
-		ePaperDisplay::DEVICE_MODEL model,
+		ePaperDeviceModel model,
 		int deviceReadyPin,
 		int deviceResetPin,
 		int deviceDataCommandPin,
@@ -83,9 +73,11 @@ public:
 	
 	virtual ~ePaperDisplay();
 
-	void powerUpDevice(void) const;
-
-	ePaperDisplay::DEVICE_MODEL model(void) const			{ return _model; }
+	void initializeDevice(void) const;
+	void powerOn(void) const;
+	void powerOff(void) const;
+	
+	ePaperDeviceModel model(void) const			{ return _model; }
 
 	//
 	// Adafruit GFX support
@@ -100,7 +92,7 @@ public:
 	//
 	//
 	
-	void display(void);
+	void refreshDisplay(void);
 	void clearDisplay(void);
 	
 	void setDeviceImage( 

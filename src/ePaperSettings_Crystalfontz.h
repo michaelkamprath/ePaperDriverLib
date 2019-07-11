@@ -22,7 +22,7 @@
 //
 #ifndef __ePaperSettings_Crystalfontz__
 #define __ePaperSettings_Crystalfontz__
-// This file contains all the device specific look up tables and configurations for the 
+// This file contains all the device specific configurations for the Crystalfontz brand
 // ePaper devices this library supports. 
 
 // the configuration is set up as a byte stream configuration bytes, commands, and data.
@@ -38,6 +38,46 @@
 // consecutive  data blocks.
 
 //
+// Model CFAP104212E0-0213 - 2.13 Inch 3-color ePaper display
+//
+
+const uint8_t deviceConfiguration_CFAP104212E0_0213[] PROGMEM = 
+{
+	// panel setting command
+	0,	0x01,	
+	5,	0x03,	0x00,	0x2B,	0x2B,	0x03,
+
+	// booster soft start
+	0,	0x06,
+	3,	0x17,	0x17,	0x17,
+
+	// power on command. Always "wait for ready" after this sequence
+	0,	0x04,
+	0xFF,		// wait for ready
+
+	// Panel Setting
+	0,	0x00,
+	1,	0x0F,
+		
+	// PLL Control
+	0,	0x30,
+	1,	0x3a,
+	
+	//Resolution
+	0,	0x61,
+	3,	0x68,	0x00,	0xD4,
+	
+	//VCOM_DC Setting
+	0,	0x82,
+	1,	0x28,
+	
+	//Vcom and data interval setting
+	0,	0x50,
+	1,	0x87
+};
+const uint8_t deviceConfigurationSize_CFAP104212E0_0213 PROGMEM = 39;
+
+
 // MODEL CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
 //
 const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM = 
@@ -88,5 +128,43 @@ const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM =
 };
 const uint8_t deviceConfigurationSize_CFAP176264A0_0270 PROGMEM = 64;
 
+//
+// MODEL CFAP4003002A0-0420 - 4.2 INCH 3-Color ePaper Display
+//
+const uint8_t deviceConfiguration_CFAP4003002A0_0420[] PROGMEM = 
+{
+	// panel setting command
+	0,	0x01,	
+	5,	0x03,	0x00,	0x0A,	0x00,	0x03,
+
+	// booster soft start
+	0,	0x06,
+	3,	0x17,	0x17,	0x17,
+	
+	// power on command. Always "wait for ready" after this sequence
+	0,	0x04,
+	0xFF,		// wait for ready
+
+	// Panel Setting
+	0,	0x00,
+	1,	0x0F,
+		
+	// PLL Control
+	0,	0x30,
+	1,	0x29,
+	
+	//Resolution
+	0,	0x61,
+	4,	0x01,	0x90,	0x01,	0x2C,
+	
+	//VCOM_DC Setting
+	0,	0x82,
+	1,	0x28,
+	
+	//Vcom and data interval setting
+	0,	0x50,
+	1,	0x87
+};
+const uint8_t deviceConfigurationSize_CFAP4003002A0_0420 PROGMEM = 40;
 
 #endif // __ePaperSettings_Crystalfontz__

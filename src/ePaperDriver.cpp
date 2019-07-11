@@ -30,7 +30,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include "ePaperDriver.h"
-#include "ePaperSettings_Crystalfontz.h"
+#include "ePaperDeviceConfigurations.h"
 
 #define DEBUG 0
 
@@ -48,83 +48,23 @@
   (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b))) ///< No-temp-var swap operation
 
 
-const uint8_t* ePaperDisplay::deviceConfiguration(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return deviceConfiguration_CFAP176264A0_0270;
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
-uint8_t ePaperDisplay::deviceConfigurationSize(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return pgm_read_byte(&deviceConfigurationSize_CFAP176264A0_0270);
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
-int ePaperDisplay::deviceSizeVertical(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return 264;
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
-int ePaperDisplay::deviceSizeHorizontal(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return 176;
-			break;
-		default:
-			return 0;
-			break;
-	}
-}
-
-bool ePaperDisplay::deviceHasThirdColor(ePaperDisplay::DEVICE_MODEL model)
-{
-	switch (model) {
-		case CFAP176264A0_0270:
-			return true;
-			break;
-		default:
-			return false;
-			break;
-	}
-}
-
 ePaperDisplay::ePaperDisplay(
-		ePaperDisplay::DEVICE_MODEL model,
+		ePaperDeviceModel model,
 		int deviceReadyPin,
 		int deviceResetPin,
 		int deviceDataCommandPin,
 		int deviceSelectPin
 	) :	Adafruit_GFX(
-				ePaperDisplay::deviceSizeHorizontal(model),
-				ePaperDisplay::deviceSizeVertical(model)
+				ePaperDeviceConfigurations::deviceSizeHorizontal(model),
+				ePaperDeviceConfigurations::deviceSizeVertical(model)
 			),
 		_model( model ),
 		_deviceReadyPin( deviceReadyPin ),
 		_deviceResetPin( deviceResetPin ),
 		_deviceDataCommandPin( deviceDataCommandPin ),
 		_deviceSelectPin( deviceSelectPin ),
-		_configuration(ePaperDisplay::deviceConfiguration(model)),
-		_configurationSize(ePaperDisplay::deviceConfigurationSize(model)),
+		_configuration(ePaperDeviceConfigurations::deviceConfiguration(model)),
+		_configurationSize(ePaperDeviceConfigurations::deviceConfigurationSize(model)),
 		_bufferSize(0),
 		_blackBuffer(nullptr),
 		_colorBuffer(nullptr)
@@ -136,7 +76,7 @@ ePaperDisplay::ePaperDisplay(
 	
 	_bufferSize = width()*((height()+7)/8);
 	_blackBuffer = (uint8_t *)malloc(_bufferSize);
-	if (ePaperDisplay::deviceHasThirdColor(model)) {
+	if (ePaperDeviceConfigurations::deviceHasThirdColor(model)) {
 		_colorBuffer = (uint8_t *)malloc(_bufferSize);
 	}
 	
@@ -234,7 +174,7 @@ void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataAr
 
 }
 
-void ePaperDisplay::powerUpDevice(void) const
+void ePaperDisplay::initializeDevice(void) const
 {
 	DEBUG_PRINTLN("powering up device");
 	DEBUG_PRINTLN("resetting driver");
@@ -243,6 +183,22 @@ void ePaperDisplay::powerUpDevice(void) const
 	sendCommandAndDataSequenceFromProgMem(_configuration, _configurationSize);	
 	DEBUG_PRINTLN("done setting up device.\n");
 }
+
+void ePaperDisplay::powerOn(void) const
+{
+	sendCommand(0x04);
+	waitForReady();
+}
+
+void ePaperDisplay::powerOff(void) const
+{
+	uint8_t data = 0x00;
+	
+	sendCommand(0x02);
+	sendCommand(0x03);
+	sendData(&data, 1, false);
+}
+
 
 /*!
     @brief  Clear contents of display buffer (set all pixels to off).
@@ -434,7 +390,7 @@ void  ePaperDisplay::invertDisplay(boolean i)
     		a display refresh. This function does not return until the display refresh 
     		has completed.
 */
-void ePaperDisplay::display(void)
+void ePaperDisplay::refreshDisplay(void)
 {
 	if (_blackBuffer != nullptr) {
 		sendCommand(0x10);
@@ -446,7 +402,7 @@ void ePaperDisplay::display(void)
 		sendData(_colorBuffer, _bufferSize, false);
 		yield();
 	}
-	
+	sendCommand(0x11);
 	sendCommand(0x12);
 	waitForReady();
 }

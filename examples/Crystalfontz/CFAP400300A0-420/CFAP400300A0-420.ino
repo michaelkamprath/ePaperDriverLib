@@ -7,25 +7,14 @@ ePaperDisplay *device;
 
 void setup() {
 #if defined( ESP8266 )
-	device = new ePaperDisplay( CFAP176264A0_0270, D1, D2, D3, D8 );
+	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
 #else
-	device = new ePaperDisplay( CFAP176264A0_0270, 3, 4, 5, 10 );
+	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
 #endif
 	device->initializeDevice();	
 }
 
 void loop() {
-	//
-	// demonstrate setting an image straight to the device
-	//
-	device->powerOn();
-	device->setDeviceImage(
-	  Splash_Mono_1BPP, 5808, true,
-	  Splash_Red_1BPP, 5808, true
-	);
-	device->refreshDisplay();
-	device->powerOff();
-	delay(10000);
 
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
@@ -38,9 +27,12 @@ void loop() {
 	const __FlashStringHelper	* str = F("Hello World!");
 	int16_t x1, y1;
 	uint16_t w, h;
+
+	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
+  
 	int centerX = device->width()/2;
-	int centerY = device->height()/2;
-	int radius = device->width() < device->height() ? device->width()/2 - 1 : device->height()/2 - 1;
+	int centerY = device->height()/2 - h;
+	int radius = device->height()/2 - 5 - h;
 
 	device->clearDisplay();
 	device->fillCircle(centerX, centerY, radius, ePaper_COLOR);
@@ -57,7 +49,6 @@ void loop() {
 		ePaper_WHITE		
 	);
 	
-	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
 	device->setCursor(centerX-w/2, device->height() - 8);
 	device->print(str);
 		
