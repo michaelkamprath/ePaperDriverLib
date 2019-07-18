@@ -130,7 +130,7 @@ void ePaperDisplay::sendCommand( uint8_t cmd ) const
 	digitalWrite(_deviceSelectPin, HIGH);
 }
 
-void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem ) const
+void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem, bool invertBits ) const
 {
 	DEBUG_PRINTLN("Sending data to device...");
 	digitalWrite(_deviceDataCommandPin, HIGH);
@@ -141,6 +141,9 @@ void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool
 			data = pgm_read_byte(&dataArray[i]);
 		} else {
 			data = dataArray[i];
+			if (invertBits) {
+				data = ~data;
+			}
 		}
 		SPI.transfer(data);
 		digitalWrite(_deviceSelectPin, HIGH);
@@ -394,16 +397,28 @@ void ePaperDisplay::refreshDisplay(void)
 {
 	if (_blackBuffer != nullptr) {
 		sendCommand(0x10);
-		sendData(_blackBuffer, _bufferSize, false);
+		sendData(
+			_blackBuffer,
+			_bufferSize,
+			false,
+			ePaperDeviceConfigurations::deviceUsesInvertedBlackBits(this->model())
+		);
 		yield();
 	}
 	if (_colorBuffer != nullptr) {
 		sendCommand(0x13);
-		sendData(_colorBuffer, _bufferSize, false);
+		sendData(
+			_colorBuffer,
+			_bufferSize,
+			false,
+			ePaperDeviceConfigurations::deviceUsesInvertedColorBits(this->model())
+		);
 		yield();
-	}
+	}	
+	uint8_t data = 0x80;
+
 	sendCommand(0x11);
-	sendCommand(0x12);
+	sendData(&data, 1, false);
 	waitForReady();
 }
 

@@ -1,14 +1,14 @@
 #include "ePaperDriver.h"
-#include <Fonts/FreeSansBoldOblique12pt7b.h>
+#include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSansBold18pt7b.h>
 
 ePaperDisplay *device;
 
 void setup() {
 #if defined( ESP8266 )
-	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
+	device = new ePaperDisplay( GDEW029Z10, D1, D2, D3, D8 );
 #else
-	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
+	device = new ePaperDisplay( GDEW029Z10, 3, 4, 5, 10 );
 #endif
 	device->initializeDevice();	
 }
@@ -19,19 +19,17 @@ void loop() {
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
 	device->powerOn();
-	device->setFont(&FreeSansBoldOblique12pt7b);
+	device->setFont(&FreeSans9pt7b);
 	device->setTextColor(ePaper_BLACK);
 	device->setRotation(0);
 	
-	const __FlashStringHelper	* str = F("Hello World!");
+	const __FlashStringHelper *str = F("Hello World!");
+	const __FlashStringHelper *str2 = F("128 x 296 px");
 	int16_t x1, y1;
 	uint16_t w, h;
-
-	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
-  
 	int centerX = device->width()/2;
-	int centerY = device->height()/2 - h;
-	int radius = device->height()/2 - 5 - h;
+	int centerY = device->height()/2;
+	int radius = device->width() < device->height() ? device->width()/2 - 1 : device->height()/2 - 1;
 
 	device->clearDisplay();
 	device->fillCircle(centerX, centerY, radius, ePaper_COLOR);
@@ -48,8 +46,13 @@ void loop() {
 		ePaper_WHITE		
 	);
 	
+	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
 	device->setCursor(centerX-w/2, device->height() - 8);
 	device->print(str);
+
+	device->getTextBounds(str2, 0, 0, &x1, &y1, &w, &h);
+	device->setCursor(centerX-w/2, h+8);
+	device->print(str2);
 		
 	device->refreshDisplay();
 	device->powerOff();

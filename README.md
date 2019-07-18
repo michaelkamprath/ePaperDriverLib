@@ -15,7 +15,7 @@ These color constants are defined in the `ePaperDriver.h` header.
 To initialize an ePaper device object, you simply declare it and call `initializeDevice()` as follows:
 ```
 ePaperDisplay	device(
-		ePaperDisplay::CFAP176264A0_0270,	// device constant indicating what model it is
+		CFAP176264A0_0270,	// device constant indicating what model it is
 		D1,		// microtroller pin connected to display's BUSY pin
 		D2,		// microtroller pin connected to display's RST pin
 		D3,		// microtroller pin connected to display's D/C pin

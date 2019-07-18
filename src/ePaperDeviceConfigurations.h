@@ -25,6 +25,7 @@
 #define __ePaperDeviceConfigurations__
 #include "ePaperDeviceModels.h"
 #include "ePaperSettings_Crystalfontz.h"
+#include "ePaperSettings_GoodDisplay.h"
 
 namespace ePaperDeviceConfigurations {
 
@@ -33,6 +34,8 @@ namespace ePaperDeviceConfigurations {
 	int deviceSizeVertical(ePaperDeviceModel model);
 	int deviceSizeHorizontal(ePaperDeviceModel model);
 	bool deviceHasThirdColor(ePaperDeviceModel model);
+	bool deviceUsesInvertedBlackBits(ePaperDeviceModel model);
+	bool deviceUsesInvertedColorBits(ePaperDeviceModel model);
 
 };
 

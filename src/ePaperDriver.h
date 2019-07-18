@@ -57,7 +57,7 @@ private:
 	
 protected:
 	void sendCommand( uint8_t cmd ) const;
-	void sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem ) const;
+	void sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem, bool invertBits = false ) const;
 	void sendCommandAndDataSequenceFromProgMem( const uint8_t *dataArray, uint16_t arraySize) const;
 
 

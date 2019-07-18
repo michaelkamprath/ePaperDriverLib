@@ -1,20 +1,19 @@
-#include "ePaperDriver.h"
+#include <ePaperDriver.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
-#include <Fonts/FreeSansBold18pt7b.h>
+#include <Fonts/FreeSansBold24pt7b.h>
 
 ePaperDisplay *device;
 
 void setup() {
 #if defined( ESP8266 )
-	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
+	device = new ePaperDisplay( GDEW0371Z80, D1, D2, D3, D8 );
 #else
-	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
+	device = new ePaperDisplay( GDEW0371Z80, 3, 4, 5, 10 );
 #endif
 	device->initializeDevice();	
 }
 
 void loop() {
-
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
@@ -30,8 +29,8 @@ void loop() {
 	device->getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
   
 	int centerX = device->width()/2;
-	int centerY = device->height()/2 - h;
-	int radius = device->height()/2 - 5 - h;
+	int centerY = device->height()/2;
+	int radius = device->width()/2 - 1;
 
 	device->clearDisplay();
 	device->fillCircle(centerX, centerY, radius, ePaper_COLOR);
@@ -59,7 +58,7 @@ void loop() {
 	// demonstrate drawing to a "rotated" screen
 	//
 	device->powerOn();
-	device->setFont(&FreeSansBold18pt7b);
+	device->setFont(&FreeSansBold24pt7b);
 	device->setTextColor(ePaper_INVERSE1);
 	device->setRotation(1);
 	device->clearDisplay();

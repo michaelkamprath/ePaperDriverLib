@@ -38,6 +38,18 @@ typedef enum {
 	CFAP400300C0_420,		// yellow
 	
 
+	// Model: Good Display GDEW026Z39 - 2.6 Inch 3-Color
+	GDEW026Z39,
+	
+	// Model: Good Display GDEW026Z39 - 2.7 Inch 3-Color
+	GDEW027C44,
+	
+	// Model: Good Display GDEW029Z10 - 2.9 Inch 3-Color
+	GDEW029Z10,
+	
+	// Model: Good Display GDEW0371Z80 - 3.71Inch 3-Color
+	GDEW0371Z80,
+	
 } ePaperDeviceModel;
 
 #endif //__ePaperDeviceModels__
