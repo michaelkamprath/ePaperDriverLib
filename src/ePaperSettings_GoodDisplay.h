@@ -1,4 +1,5 @@
-
+#ifndef __ePaperSettings_GoodDisplay__
+#define __ePaperSettings_GoodDisplay__
 
 //
 // Model GDEW026Z39 - 2.6 Inch 3-color ePaper display
@@ -99,3 +100,5 @@ const uint8_t deviceConfiguration_GDEW0371Z80[] PROGMEM =
 	2,	0x11, 0x07
 };
 const uint8_t deviceConfigurationSize_GDEW0371Z80 PROGMEM = 24;
+
+#endif //__ePaperSettings_GoodDisplay__

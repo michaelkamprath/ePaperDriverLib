@@ -63,8 +63,8 @@ ePaperDisplay::ePaperDisplay(
 		_deviceResetPin( deviceResetPin ),
 		_deviceDataCommandPin( deviceDataCommandPin ),
 		_deviceSelectPin( deviceSelectPin ),
-		_configuration(ePaperDeviceConfigurations::deviceConfiguration(model)),
-		_configurationSize(ePaperDeviceConfigurations::deviceConfigurationSize(model)),
+		_configuration(ePaperDeviceConfigurations::deviceConfigurationCMD(model)),
+		_configurationSize(ePaperDeviceConfigurations::deviceConfigurationCMDSize(model)),
 		_bufferSize(0),
 		_blackBuffer(nullptr),
 		_colorBuffer(nullptr)
@@ -102,9 +102,15 @@ ePaperDisplay::~ePaperDisplay()
 
 void ePaperDisplay::waitForReady(void) const
 {
-	DEBUG_PRINT("Waiting until epaper device is complete .");
-	while (0 == digitalRead(_deviceReadyPin)) {
+	uint8_t busyValue = ePaperDeviceConfigurations::deviceBusyValue(model());
+	
+	DEBUG_PRINT("Waiting until epaper device is complete with busy value = ");
+	DEBUG_PRINT(busyValue);
+	DEBUG_PRINT(" : .");
+	
+	while (busyValue == digitalRead(_deviceReadyPin)) {
 		yield();
+		if (_waitCallbackFunc) _waitCallbackFunc();
 		DEBUG_PRINT(".");
 	}
 	DEBUG_PRINT("  Done!\n");
@@ -152,6 +158,40 @@ void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool
 	DEBUG_PRINTLN("    Done sending data to device.");
 }
 
+/****************************
+	Handles sending a sequence of commands and data based on configuration found
+	in a byte blob. The method reads the first byte which represents a directive,
+	then operates on the next N bytes based on the nature of the directive. The
+	Supported directives are:
+
+			0x00 - Send Command - Sends the ned 1 byte as a command to the device
+			0xFF - Wait until read - Waites under device's ready pin goes HIGH. No
+					further bytes are consumed.
+			0xFE -  Reserved
+			0xFD - Send B&W image - Sends B&W image to device from current buffer. No
+					further bytes are consumed.
+			0xFC - Send color image - Sends color image to devices that support it from
+					current buffer. Ignored if device does not support color image. No
+					further bytes are consumed.
+			0xFB -	Reserved
+			0xFA -	Reserved
+			0xF9 -	Reserved
+			0xF8 -	Reserved
+			0xF7 -	Reserved
+			0xF6 -	Reserved
+			0xF5 -	Reserved
+			0xF4 -	Reserved
+			0xF3 -	Reserved
+			0xF2 -	Reserved
+			0xF0 -	Reserved
+			
+		
+			>0x01 - Send data - For directive values not defined above, interpret as a 
+					"send next N bytes as data" when N is equal to directive byte value.
+					Note that any directive value not defined above is always interpreted
+					as an N value.
+
+*/
 void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataArray, uint16_t arraySize) const
 {
 	uint16_t index = 0;
@@ -167,12 +207,29 @@ void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataAr
 		} else if (b == 0xFF ) {
 			waitForReady();
 			index++;
-		} else {
+		} else if (b == 0xFD ) {
+			sendData(
+				_blackBuffer,
+				_bufferSize,
+				false,
+				ePaperDeviceConfigurations::deviceUsesInvertedBlackBits(this->model())
+			);
+			index++;
+		} else if (b == 0xFC ) {
+			sendData(
+				_colorBuffer,
+				_bufferSize,
+				false,
+				ePaperDeviceConfigurations::deviceUsesInvertedColorBits(this->model())
+			);		
+			index++;
+		} else if (b < (uint16_t)0xF0) {
 			// b is and array length. send the next b bytes as dataArray
 			index++;
 			sendData(&dataArray[index], b, true);
 			index += b;
 		}
+		yield();
 	}
 
 }
@@ -182,7 +239,9 @@ void ePaperDisplay::initializeDevice(void) const
 	DEBUG_PRINTLN("powering up device");
 	DEBUG_PRINTLN("resetting driver");
 	resetDriver();
-	DEBUG_PRINTLN("sending configuration");
+	DEBUG_PRINT("sending configuration with size = ");
+	DEBUG_PRINT(_configurationSize);
+	DEBUG_PRINT("\n");
 	sendCommandAndDataSequenceFromProgMem(_configuration, _configurationSize);	
 	DEBUG_PRINTLN("done setting up device.\n");
 }
@@ -200,6 +259,21 @@ void ePaperDisplay::powerOff(void) const
 	sendCommand(0x02);
 	sendCommand(0x03);
 	sendData(&data, 1, false);
+}
+
+/*!
+    @brief  Pushes the current image buffer contents to the ePaper device.
+    @return None (void).
+    @note   Pushes the current buffer contents to the ePaper device, and then triggers
+    		a display refresh. This function does not return until the display refresh 
+    		has completed.
+*/
+void ePaperDisplay::refreshDisplay(void)
+{
+	sendCommandAndDataSequenceFromProgMem(
+		ePaperDeviceConfigurations::setImageAndRefreshCMD(model()),
+		ePaperDeviceConfigurations::setImageAndRefreshCMDSize(model())
+	);
 }
 
 
@@ -235,15 +309,15 @@ void ePaperDisplay::drawPixel(int16_t x, int16_t y, uint16_t color)
 		int16_t buffer_index = (y*WIDTH + x)/8;
 		int8_t buffer_bit_mask = (1 << (7-(y*WIDTH + x)&7));
 		
-		DEBUG_PRINT(F("Setting pixel ( x = "));
-		DEBUG_PRINT(x);
-		DEBUG_PRINT(F(", y = "));
-		DEBUG_PRINT(y);
-		DEBUG_PRINT(F(" ), buffer_index = "));
-		DEBUG_PRINT(buffer_index);
-		DEBUG_PRINT(F(", buffer_bit_mask = 0x"));
-		DEBUG_PRINTFORMAT(buffer_bit_mask, HEX);
-		DEBUG_PRINT(F("\n"));
+// 		DEBUG_PRINT(F("Setting pixel ( x = "));
+// 		DEBUG_PRINT(x);
+// 		DEBUG_PRINT(F(", y = "));
+// 		DEBUG_PRINT(y);
+// 		DEBUG_PRINT(F(" ), buffer_index = "));
+// 		DEBUG_PRINT(buffer_index);
+// 		DEBUG_PRINT(F(", buffer_bit_mask = 0x"));
+// 		DEBUG_PRINTFORMAT(buffer_bit_mask, HEX);
+// 		DEBUG_PRINT(F("\n"));
 		
 		switch(color) {
 			case ePaper_WHITE:
@@ -386,41 +460,6 @@ void  ePaperDisplay::invertDisplay(boolean i)
 }
 
 
-/*!
-    @brief  Pushes the current image buffer contents to the ePaper device.
-    @return None (void).
-    @note   Pushes the current buffer contents to the ePaper device, and then triggers
-    		a display refresh. This function does not return until the display refresh 
-    		has completed.
-*/
-void ePaperDisplay::refreshDisplay(void)
-{
-	if (_blackBuffer != nullptr) {
-		sendCommand(0x10);
-		sendData(
-			_blackBuffer,
-			_bufferSize,
-			false,
-			ePaperDeviceConfigurations::deviceUsesInvertedBlackBits(this->model())
-		);
-		yield();
-	}
-	if (_colorBuffer != nullptr) {
-		sendCommand(0x13);
-		sendData(
-			_colorBuffer,
-			_bufferSize,
-			false,
-			ePaperDeviceConfigurations::deviceUsesInvertedColorBits(this->model())
-		);
-		yield();
-	}	
-	uint8_t data = 0x80;
-
-	sendCommand(0x11);
-	sendData(&data, 1, false);
-	waitForReady();
-}
 
 /*!
     @brief  Sets the device image buffer directly. 

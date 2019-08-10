@@ -24,19 +24,22 @@
 #ifndef __ePaperDeviceConfigurations__
 #define __ePaperDeviceConfigurations__
 #include "ePaperDeviceModels.h"
-#include "ePaperSettings_Crystalfontz.h"
-#include "ePaperSettings_GoodDisplay.h"
 
 namespace ePaperDeviceConfigurations {
 
-	const uint8_t* deviceConfiguration(ePaperDeviceModel model);
-	uint8_t deviceConfigurationSize(ePaperDeviceModel model);
+	const uint8_t* deviceConfigurationCMD(ePaperDeviceModel model);
+	uint8_t deviceConfigurationCMDSize(ePaperDeviceModel model);
+
+	const uint8_t* setImageAndRefreshCMD(ePaperDeviceModel model);
+	uint8_t setImageAndRefreshCMDSize(ePaperDeviceModel model);
+	
 	int deviceSizeVertical(ePaperDeviceModel model);
 	int deviceSizeHorizontal(ePaperDeviceModel model);
 	bool deviceHasThirdColor(ePaperDeviceModel model);
 	bool deviceUsesInvertedBlackBits(ePaperDeviceModel model);
 	bool deviceUsesInvertedColorBits(ePaperDeviceModel model);
 
+	uint8_t deviceBusyValue(ePaperDeviceModel model);
 };
 
 #endif // __ePaperDeviceConfigurations__

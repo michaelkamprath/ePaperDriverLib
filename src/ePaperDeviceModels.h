@@ -25,6 +25,9 @@
 #define __ePaperDeviceModels__
 
 typedef enum {
+	// Model CFAP200200A1-0154 - 1.54 Inch B&W ePaper display
+	CFAP200200A1_0154,
+
 	// Model: Crystalfontz CFAP104212*0-0213 - 2.13 Inch 3-color ePaper display
 	CFAP104212C0_0213,		// red
 	CFAP104212E0_0213,		// yellow 

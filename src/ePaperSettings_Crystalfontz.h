@@ -37,6 +37,77 @@
 // block can only be 254 bytes in size. if more need to be sent, then just define multiple 
 // consecutive  data blocks.
 
+// 
+// Model CFAP200200A1-0154 - 1.54 Inch B&W ePaper display
+// 
+// 
+const uint8_t deviceConfiguration_CFAP200200A1_0154[] PROGMEM = 
+{
+	// panel setting command
+	0,	0x01,	
+	3,	0xC7,	0x00,	0x00,
+
+	// soft start
+	0,	0x0C,
+	3,	0xD7,	0xD6,	0x9D,
+
+	// VCOMVol
+	0,	0x2c,
+	1,	0x7f,
+	
+	//dummy line per gate
+	0,	0x3A,
+	1,	0x1A,
+	
+	// RAM data entry sequence
+	0,	0x11,
+	1,	0x01,
+};
+
+const uint8_t setFullScreenImage_CMD_CFAP200200A1_0154[] PROGMEM = {
+			
+	// waveform LUT
+	0,	0x32,
+	30,	0x66,    0x66,	  0x44,	  0x66,	  0xAA,	  0x11,	  0x80,	  0x08,	  0x11,	  0x18,	  0x81,	  0x18,	  0x11,	  0x88,	  0x11,	  0x88,	  0x11,	  0x88,	  0x00,	  0x00,	  0xFF,	  0xFF,	  0xFF,	  0xFF,	  0x5F,	  0xAF,	  0xFF,	  0xFF,	  0x2F,	  0x00,
+	
+	// RAMX Start/End
+	0,	0x44,
+	2,	0x00,	0x18,
+	
+	// RAMY Start/End
+	0,	0x45,
+	4,	0xC7,	0x00,	0x00,	0x00,
+
+	// set RAMX address counter
+	0,	0x4E,
+	1,	0x00,
+	
+	// set RAMX address counter
+	0,	0x4F,
+	2,	0xC7,	0x00,
+	
+	// wait for ready
+	0xFF,
+
+	// set black image command
+	0,	0x24,
+	
+	// send black data
+	0xFD,
+
+	// display update using LUT in RAM
+	0,	0x22,
+	1,	0xC7,
+	
+	// Image update
+	0,	0x20,
+	0,	0xFF,
+
+	// wait until ready
+	0xFF	
+	
+};	
+
 //
 // Model CFAP104212E0-0213 - 2.13 Inch 3-color ePaper display
 //

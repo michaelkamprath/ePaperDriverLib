@@ -22,8 +22,9 @@
 //
 #include <Arduino.h>
 #include "ePaperDeviceConfigurations.h"
+#include "ePaperSettings.h"
 
-const uint8_t* ePaperDeviceConfigurations::deviceConfiguration(ePaperDeviceModel model)
+const uint8_t* ePaperDeviceConfigurations::deviceConfigurationCMD(ePaperDeviceModel model)
 {
 	switch (model) {
 		case CFAP104212C0_0213:
@@ -38,6 +39,8 @@ const uint8_t* ePaperDeviceConfigurations::deviceConfiguration(ePaperDeviceModel
 		case CFAP400300A0_420:
 			return deviceConfiguration_CFAP4003002A0_0420;
 			break;
+		case CFAP200200A1_0154:
+			return deviceConfiguration_CFAP200200A1_0154;
 
 		case GDEW026Z39:
 			return deviceConfiguration_GDEW026Z39;
@@ -54,7 +57,7 @@ const uint8_t* ePaperDeviceConfigurations::deviceConfiguration(ePaperDeviceModel
 	}
 }
 
-uint8_t ePaperDeviceConfigurations::deviceConfigurationSize(ePaperDeviceModel model)
+uint8_t ePaperDeviceConfigurations::deviceConfigurationCMDSize(ePaperDeviceModel model)
 {
 	switch (model) {
 		case CFAP104212C0_0213:
@@ -68,6 +71,9 @@ uint8_t ePaperDeviceConfigurations::deviceConfigurationSize(ePaperDeviceModel mo
 		case CFAP400300A0_420:
 		case CFAP400300C0_420:
 			return pgm_read_byte(&deviceConfigurationSize_CFAP4003002A0_0420);
+			break;
+		case CFAP200200A1_0154:
+			return sizeof(deviceConfiguration_CFAP200200A1_0154);
 			break;
 
 		case GDEW026Z39:
@@ -84,6 +90,53 @@ uint8_t ePaperDeviceConfigurations::deviceConfigurationSize(ePaperDeviceModel mo
 			break;
 	}
 }
+
+const uint8_t* ePaperDeviceConfigurations::setImageAndRefreshCMD(ePaperDeviceModel model)
+{
+	switch (model) {
+		case CFAP104212C0_0213:
+		case CFAP104212E0_0213:
+		case CFAP176264A0_0270:
+		case CFAP400300C0_420:
+		case CFAP400300A0_420:
+		case GDEW026Z39:
+		case GDEW027C44:
+		case GDEW029Z10:
+		case GDEW0371Z80:
+			return setImage_CMD_3color;
+			break;
+		case CFAP200200A1_0154:
+			return setFullScreenImage_CMD_CFAP200200A1_0154;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+uint8_t ePaperDeviceConfigurations::setImageAndRefreshCMDSize(ePaperDeviceModel model)
+{
+	switch (model) {
+		case CFAP104212C0_0213:
+		case CFAP104212E0_0213:
+		case CFAP176264A0_0270:
+		case CFAP400300C0_420:
+		case CFAP400300A0_420:
+		case GDEW026Z39:
+		case GDEW027C44:
+		case GDEW029Z10:
+		case GDEW0371Z80:
+			return setImage_CMD_3color_size;
+			break;
+		case CFAP200200A1_0154:
+			return sizeof(setFullScreenImage_CMD_CFAP200200A1_0154);
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
 
 int ePaperDeviceConfigurations::deviceSizeVertical(ePaperDeviceModel model)
 {
@@ -108,6 +161,9 @@ int ePaperDeviceConfigurations::deviceSizeVertical(ePaperDeviceModel model)
 			break;
 		case GDEW0371Z80:
 			return 416;
+			break;
+		case CFAP200200A1_0154:
+			return 200;
 			break;
 		default:
 			return 0;
@@ -138,6 +194,9 @@ int ePaperDeviceConfigurations::deviceSizeHorizontal(ePaperDeviceModel model)
 			break;
 		case GDEW0371Z80:
 			return 240;
+			break;
+		case CFAP200200A1_0154:
+			return 200;
 			break;
 		default:
 			return 0;
@@ -171,6 +230,7 @@ bool ePaperDeviceConfigurations::deviceUsesInvertedBlackBits(ePaperDeviceModel m
 		case GDEW026Z39:
 		case GDEW029Z10:
 		case GDEW0371Z80:
+		case CFAP200200A1_0154:
 			return true;
 			break;
 		default:
@@ -191,4 +251,15 @@ bool ePaperDeviceConfigurations::deviceUsesInvertedColorBits(ePaperDeviceModel m
 			break;
 	}
 }
-
+uint8_t ePaperDeviceConfigurations::deviceBusyValue(ePaperDeviceModel model)
+{
+	switch (model) {
+		case CFAP200200A1_0154:
+			// documentation says it should be LOW, but sample code and reality says is is HIGH
+			return HIGH;
+			break;
+		default:
+			return LOW;
+			break;
+	}
+}

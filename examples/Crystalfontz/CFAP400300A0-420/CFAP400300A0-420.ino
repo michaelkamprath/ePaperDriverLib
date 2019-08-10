@@ -7,6 +7,8 @@ ePaperDisplay *device;
 void setup() {
 #if defined( ESP8266 )
 	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
+#elif defined ( ESP32 )
+	device = new ePaperDisplay( GDEW0371Z80, 21, 2, 4, 5 );
 #else
 	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
 #endif

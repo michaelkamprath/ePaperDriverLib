@@ -52,6 +52,8 @@ private:
 	uint8_t *_blackBuffer;
 	uint8_t *_colorBuffer;
 	
+	void (*_waitCallbackFunc)(void);
+	
 	void waitForReady(void) const;
 	void resetDriver(void) const;
 	
@@ -79,6 +81,8 @@ public:
 	
 	ePaperDeviceModel model(void) const			{ return _model; }
 
+	void setWaitCallBackFunction( void (*fp)(void) )
+												{ _waitCallbackFunc = fp; }
 	//
 	// Adafruit GFX support
 	//
