@@ -165,7 +165,7 @@ void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool
 	Supported directives are:
 
 			0x00 - Send Command - Sends the ned 1 byte as a command to the device
-			0xFF - Wait until read - Waites under device's ready pin goes HIGH. No
+			0xFF - Wait until ready - Waites under device's ready pin goes HIGH. No
 					further bytes are consumed.
 			0xFE -  Reserved
 			0xFD - Send B&W image - Sends B&W image to device from current buffer. No
