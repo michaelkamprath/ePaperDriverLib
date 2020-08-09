@@ -114,6 +114,16 @@ public:
 				bool colorBitMapIsProgMem
 			);
 		
+	void drawBitImage( 
+				int16_t loc_x, int16_t loc_y,
+				int16_t img_w, int16_t img_h,
+				const uint8_t* blackBitMap,
+				uint16_t blackBitMapSize,
+				bool blackBitMapIsProgMem,
+				const uint8_t* colorBitMap,
+				uint16_t colorBitMapSize,
+				bool colorBitMapIsProgMem
+			);
 };
 
 #endif // __ePaperDriver__

@@ -32,7 +32,7 @@
 #include "ePaperDriver.h"
 #include "ePaperDeviceConfigurations.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define DEBUG_PRINTLN(s) Serial.println(s)
@@ -519,3 +519,33 @@ void ePaperDisplay::setDeviceImage(
 	}
 }
 
+
+void ePaperDisplay::drawBitImage( 
+	int16_t loc_x, int16_t loc_y,
+	int16_t img_w, int16_t img_h,
+	const uint8_t* blackBitMap,
+	uint16_t blackBitMapSize,
+	bool blackBitMapIsProgMem,
+	const uint8_t* colorBitMap,
+	uint16_t colorBitMapSize,
+	bool colorBitMapIsProgMem
+)
+{
+	for (int16_t i = 0; i < img_w; i++ ) {
+		for (int16_t j = 0; j < img_h; j++ ) {
+			int16_t buffer_index = (j*img_w + i)/8;
+			int8_t buffer_bit_mask = (1 << (7-(j*img_w + i)&7));
+			
+			if (blackBitMap && _blackBuffer && (buffer_index < blackBitMapSize)) {
+				uint8_t byteVal = blackBitMapIsProgMem ? pgm_read_byte(&blackBitMap[buffer_index]) : blackBitMap[buffer_index];
+				bool isBlack = byteVal&buffer_bit_mask ? true : false;
+				this->drawPixel(loc_x+i, loc_y+j, isBlack ? ePaper_BLACK : ePaper_WHITE );
+			}
+			if (colorBitMap && _colorBuffer && (buffer_index <= colorBitMapSize)) {
+				uint8_t byteVal = colorBitMapIsProgMem ? pgm_read_byte(&colorBitMap[buffer_index]) : colorBitMap[buffer_index];
+				bool isColor = byteVal&buffer_bit_mask ? true : false;
+				this->drawPixel(loc_x+i, loc_y+j, isColor ? ePaper_COLOR : ePaper_WHITE );
+			}
+		}
+	}
+}	
