@@ -544,7 +544,10 @@ void ePaperDisplay::drawBitImage(
 			if (colorBitMap && _colorBuffer && (buffer_index <= colorBitMapSize)) {
 				uint8_t byteVal = colorBitMapIsProgMem ? pgm_read_byte(&colorBitMap[buffer_index]) : colorBitMap[buffer_index];
 				bool isColor = byteVal&buffer_bit_mask ? true : false;
-				this->drawPixel(loc_x+i, loc_y+j, isColor ? ePaper_COLOR : ePaper_WHITE );
+				// only set red, let B&W image be the "background"
+				if (isColor) {
+					this->drawPixel(loc_x+i, loc_y+j, ePaper_COLOR);
+				}
 			}
 		}
 	}
