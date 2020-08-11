@@ -1,6 +1,7 @@
 #include <ePaperDriver.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
+#include "Image.h"
 
 ePaperDisplay *device;
 
@@ -81,4 +82,23 @@ void loop() {
 	device->powerOff();
 	delay(10000);
 	
+	//
+	// demonstrate drawing a pixel image to the screen 
+	//
+	device->powerOn();
+	device->setRotation(0);
+	device->clearDisplay(); 
+	device->drawBitImage(
+		0, 0,
+		IMAGE_WIDTH, IMAGE_HEIGHT,
+		image_black,
+		IMAGE_ARRAY_SIZE,
+		true,
+		image_red,
+		IMAGE_ARRAY_SIZE,
+		true
+	);
+	device->refreshDisplay();
+	device->powerOff();	
+	delay(10000);
 }
