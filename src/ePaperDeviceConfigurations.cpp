@@ -31,9 +31,8 @@ const uint8_t* ePaperDeviceConfigurations::deviceConfigurationCMD(ePaperDeviceMo
 		case CFAP104212E0_0213:
 			return deviceConfiguration_CFAP104212E0_0213;
 			break;
-		case GDEW027C44:
 		case CFAP176264A0_0270:
-			return deviceConfiguration_CFAP176264A0_0270;
+			return deviceConfiguration_GDEW027C44;
 			break;
 		case CFAP400300C0_420:
 		case CFAP400300A0_420:
@@ -45,11 +44,17 @@ const uint8_t* ePaperDeviceConfigurations::deviceConfigurationCMD(ePaperDeviceMo
 		case GDEW026Z39:
 			return deviceConfiguration_GDEW026Z39;
 			break;
+		case GDEW027C44:
+			return deviceConfiguration_GDEW027C44;
+			break;
 		case GDEW029Z10:
 			return deviceConfiguration_GDEW029Z10;
 			break;
 		case GDEW0371Z80:
 			return deviceConfiguration_GDEW0371Z80;
+			break;
+		case GDEW0371W7:
+			return deviceConfiguration_GDEW0371W7;
 			break;
 		default:
 			return 0;
@@ -64,9 +69,8 @@ uint8_t ePaperDeviceConfigurations::deviceConfigurationCMDSize(ePaperDeviceModel
 		case CFAP104212E0_0213:
 			return pgm_read_byte(&deviceConfigurationSize_CFAP104212E0_0213);
 			break;
-		case GDEW027C44:
 		case CFAP176264A0_0270:
-			return pgm_read_byte(&deviceConfigurationSize_CFAP176264A0_0270);
+			return pgm_read_byte(&deviceConfigurationSize_GDEW027C44);
 			break;
 		case CFAP400300A0_420:
 		case CFAP400300C0_420:
@@ -79,11 +83,17 @@ uint8_t ePaperDeviceConfigurations::deviceConfigurationCMDSize(ePaperDeviceModel
 		case GDEW026Z39:
 			return pgm_read_byte(&deviceConfigurationSize_GDEW026Z39);
 			break;
+		case GDEW027C44:
+			return pgm_read_byte(&deviceConfigurationSize_GDEW027C44);
+			break;
 		case GDEW029Z10:
 			return pgm_read_byte(&deviceConfigurationSize_GDEW029Z10);
 			break;
 		case GDEW0371Z80:
 			return pgm_read_byte(&deviceConfigurationSize_GDEW0371Z80);
+			break;
+		case GDEW0371W7:
+			return pgm_read_byte(&deviceConfigurationSize_GDEW0371W7);
 			break;
 		default:
 			return 0;
@@ -105,6 +115,9 @@ const uint8_t* ePaperDeviceConfigurations::setImageAndRefreshCMD(ePaperDeviceMod
 		case GDEW0371Z80:
 			return setImage_CMD_3color;
 			break;
+		case GDEW0371W7:
+			return setImage_CMD_GDEW0371W7;
+			break;
 		case CFAP200200A1_0154:
 			return setFullScreenImage_CMD_CFAP200200A1_0154;
 			break;
@@ -114,7 +127,7 @@ const uint8_t* ePaperDeviceConfigurations::setImageAndRefreshCMD(ePaperDeviceMod
 	}
 }
 
-uint8_t ePaperDeviceConfigurations::setImageAndRefreshCMDSize(ePaperDeviceModel model)
+uint16_t ePaperDeviceConfigurations::setImageAndRefreshCMDSize(ePaperDeviceModel model)
 {
 	switch (model) {
 		case CFAP104212C0_0213:
@@ -127,6 +140,9 @@ uint8_t ePaperDeviceConfigurations::setImageAndRefreshCMDSize(ePaperDeviceModel 
 		case GDEW029Z10:
 		case GDEW0371Z80:
 			return setImage_CMD_3color_size;
+			break;
+		case GDEW0371W7:
+			return setImage_CMD_GDEW0371W7_size;
 			break;
 		case CFAP200200A1_0154:
 			return sizeof(setFullScreenImage_CMD_CFAP200200A1_0154);
@@ -160,6 +176,7 @@ int ePaperDeviceConfigurations::deviceSizeVertical(ePaperDeviceModel model)
 			return 296;
 			break;
 		case GDEW0371Z80:
+		case GDEW0371W7:
 			return 416;
 			break;
 		case CFAP200200A1_0154:
@@ -193,6 +210,7 @@ int ePaperDeviceConfigurations::deviceSizeHorizontal(ePaperDeviceModel model)
 			return 128;
 			break;
 		case GDEW0371Z80:
+		case GDEW0371W7:
 			return 240;
 			break;
 		case CFAP200200A1_0154:
@@ -204,7 +222,8 @@ int ePaperDeviceConfigurations::deviceSizeHorizontal(ePaperDeviceModel model)
 	}
 }
 
-bool ePaperDeviceConfigurations::deviceHasThirdColor(ePaperDeviceModel model)
+
+ePaperColorMode ePaperDeviceConfigurations::deviceColorMode(ePaperDeviceModel model)
 {
 	switch (model) {
 		case CFAP104212C0_0213:
@@ -216,10 +235,13 @@ bool ePaperDeviceConfigurations::deviceHasThirdColor(ePaperDeviceModel model)
 		case GDEW027C44:
 		case GDEW029Z10:
 		case GDEW0371Z80:
-			return true;
+			return CMODE_3COLOR;
+			break;
+		case GDEW0371W7:
+			return CMODE_4GRAY;
 			break;
 		default:
-			return false;
+			return CMODE_BW;
 			break;
 	}
 }
@@ -230,6 +252,7 @@ bool ePaperDeviceConfigurations::deviceUsesInvertedBlackBits(ePaperDeviceModel m
 		case GDEW026Z39:
 		case GDEW029Z10:
 		case GDEW0371Z80:
+		case GDEW0371W7:
 		case CFAP200200A1_0154:
 			return true;
 			break;
@@ -244,6 +267,7 @@ bool ePaperDeviceConfigurations::deviceUsesInvertedColorBits(ePaperDeviceModel m
 	switch (model) {
 		case GDEW026Z39:
 		case GDEW029Z10:
+		case GDEW0371W7:
 			return true;
 			break;
 		default:

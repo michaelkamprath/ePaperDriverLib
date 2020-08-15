@@ -50,8 +50,11 @@ typedef enum {
 	// Model: Good Display GDEW029Z10 - 2.9 Inch 3-Color
 	GDEW029Z10,
 	
-	// Model: Good Display GDEW0371Z80 - 3.71Inch 3-Color
+	// Model: Good Display GDEW0371Z80 - 3.71 Inch 3-Color
 	GDEW0371Z80,
+	
+	// Model: Good Display GDEW0371W7 - 3.71 Inch 4 Gray Scale
+	GDEW0371W7,
 	
 } ePaperDeviceModel;
 

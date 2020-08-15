@@ -1,20 +1,35 @@
 #include "ePaperDriver.h"
 #include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSansBold18pt7b.h>
+#include "Ap_29demo.h"
 
 ePaperDisplay *device;
 
 void setup() {
 #if defined( ESP8266 )
-	device = new ePaperDisplay( GDEW029Z10, D1, D2, D3, D8 );
+	device = new ePaperDisplay( GDEW027C44, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
-	device = new ePaperDisplay( GDEW0371Z80, 21, 2, 4, 5 );
+	device = new ePaperDisplay( GDEW027C44, 21, 2, 4, 5 );
 #else
-	device = new ePaperDisplay( GDEW029Z10, 3, 4, 5, 10 );
+	device = new ePaperDisplay( GDEW027C44, 3, 4, 5, 10 );
 #endif
 }
 
 void loop() {
+	//
+	// demonstrate setting the image
+	//
+	device->setRotation(0);
+	device->setDeviceImage( 
+				gImage_black1,
+				5808,
+				true,
+				gImage_red1,
+				5808,
+				true
+			);	
+	device->refreshDisplay();
+	delay(10000);
 
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
@@ -24,7 +39,7 @@ void loop() {
 	device->setRotation(0);
 	
 	const __FlashStringHelper *str = F("Hello World!");
-	const __FlashStringHelper *str2 = F("128 x 296 px");
+	const __FlashStringHelper *str2 = F("176 x 264 px");
 	int16_t x1, y1;
 	uint16_t w, h;
 	int centerX = device->width()/2;
@@ -79,5 +94,6 @@ void loop() {
 	
 	device->refreshDisplay();
 	delay(10000);
+	
 	
 }

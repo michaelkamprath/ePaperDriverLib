@@ -25,17 +25,24 @@
 #define __ePaperDeviceConfigurations__
 #include "ePaperDeviceModels.h"
 
+typedef enum {
+	CMODE_BW,
+	CMODE_3COLOR,
+	CMODE_4GRAY
+} ePaperColorMode;
+
+
 namespace ePaperDeviceConfigurations {
 
 	const uint8_t* deviceConfigurationCMD(ePaperDeviceModel model);
 	uint8_t deviceConfigurationCMDSize(ePaperDeviceModel model);
 
 	const uint8_t* setImageAndRefreshCMD(ePaperDeviceModel model);
-	uint8_t setImageAndRefreshCMDSize(ePaperDeviceModel model);
+	uint16_t setImageAndRefreshCMDSize(ePaperDeviceModel model);
 	
 	int deviceSizeVertical(ePaperDeviceModel model);
 	int deviceSizeHorizontal(ePaperDeviceModel model);
-	bool deviceHasThirdColor(ePaperDeviceModel model);
+	ePaperColorMode deviceColorMode(ePaperDeviceModel model);
 	bool deviceUsesInvertedBlackBits(ePaperDeviceModel model);
 	bool deviceUsesInvertedColorBits(ePaperDeviceModel model);
 

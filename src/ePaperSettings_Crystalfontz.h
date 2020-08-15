@@ -148,56 +148,11 @@ const uint8_t deviceConfiguration_CFAP104212E0_0213[] PROGMEM =
 };
 const uint8_t deviceConfigurationSize_CFAP104212E0_0213 PROGMEM = 39;
 
-
+//
 // MODEL CFAP176264A0-0270 - 2.7 inch 3-color ePaper display
 //
-const uint8_t deviceConfiguration_CFAP176264A0_0270[] PROGMEM = 
-{
-	// panel setting command
-	0,	0x01,	
-	5,	0x03,	0x00,	0x26,	0x26,	0x03,
-	
-	// power on command. Always "wait for ready" after this sequence
-	0,	0x04,
-	0xFF,		// wait for ready
 
-	// booster soft start
-	0,	0x06,
-	3,	0x07,	0x07,	0x07,
-	
-	// power Optimization
-	0,	0xF8,
-	2,	0x60,	0xA5,
-	0,	0xF8,
-	2,	0x89,	0xA5,
-	0,	0xF8,
-	2,	0x90,	0x00,
-	0,	0xF8,
-	2,	0x93,	0x2A,	
-	
-	// this command resets the DFV_EN by sending a partial refresh command
-	0,	0x16,
-	1,	0x00,
-	
-	// PLL Control
-	0,	0x30,
-	1,	0x3A,
-
-	//VCM DS Settings
-	0,	0x82,
-	1,	0x12,
-	0,	0x50,
-	1,	0x87,
-	
-	// set panel setting to call LUTs from OTP
-	0,	0x00,
-	1,	0xCF,	// 11001111
-	
-	// set the device resolution to 176x264
-	0,	0x61,
-	4,	0x00,	0xB0,	0x01,	0x08
-};
-const uint8_t deviceConfigurationSize_CFAP176264A0_0270 PROGMEM = 64;
+// same as GoodDisplay GDEW027C44
 
 //
 // MODEL CFAP4003002A0-0420 - 4.2 INCH 3-Color ePaper Display
