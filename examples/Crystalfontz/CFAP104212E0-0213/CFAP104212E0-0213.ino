@@ -11,26 +11,22 @@ void setup() {
 #else
 	device = new ePaperDisplay( CFAP104212E0_0213, 3, 4, 5, 10 );
 #endif
-	device->initializeDevice();	
 }
 
 void loop() {
 	//
 	// demonstrate setting an image straight to the device
 	//
-	device->powerOn();
 	device->setDeviceImage(
 	  Splash_Mono_1BPP, 2756, true,
 	  Splash_Yellow_1BPP, 2756, true
 	);
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
-	device->powerOn();
 	device->setFont(&Picopixel);
 	device->setTextColor(ePaper_BLACK);
 	device->setRotation(0);
@@ -62,13 +58,11 @@ void loop() {
 	device->print(str);
 		
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 
 	//
 	// demonstrate drawing to a "rotated" screen
 	//
-	device->powerOn();
 	device->setFont(&FreeSansBold18pt7b);
 	device->setTextColor(ePaper_INVERSE1);
 	device->setRotation(1);
@@ -87,7 +81,6 @@ void loop() {
 	device->print(str);
 	
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 	
 }

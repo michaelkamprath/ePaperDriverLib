@@ -28,10 +28,23 @@ const uint8_t setImage_CMD_3color[] PROGMEM = {
 	0,	0x12,
 	
 	// wait until ready
-	0xFF
+	0xFE, 5,
+	0xFF,
+	
+	//VCOM AND DATA INTERVAL SETTING
+	0, 0X50,
+	1, 0xf7,
+
+	// power off
+	0,	0x02,
+	0xFF,
+	
+	// Deep Sleep
+	0,	0x07,
+	1,	0xA5,
 };
 
-const uint8_t setImage_CMD_3color_size = 9;
+const uint16_t setImage_CMD_3color_size = 15;
 
 
 

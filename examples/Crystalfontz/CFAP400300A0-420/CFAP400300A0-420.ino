@@ -8,11 +8,10 @@ void setup() {
 #if defined( ESP8266 )
 	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
-	device = new ePaperDisplay( GDEW0371Z80, 21, 2, 4, 5 );
+	device = new ePaperDisplay( CFAP400300A0_420, 21, 2, 4, 5 );
 #else
 	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
 #endif
-	device->initializeDevice();	
 }
 
 void loop() {
@@ -20,7 +19,6 @@ void loop() {
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
-	device->powerOn();
 	device->setFont(&FreeSansBoldOblique12pt7b);
 	device->setTextColor(ePaper_BLACK);
 	device->setRotation(0);
@@ -54,13 +52,11 @@ void loop() {
 	device->print(str);
 		
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 
 	//
 	// demonstrate drawing to a "rotated" screen
 	//
-	device->powerOn();
 	device->setFont(&FreeSansBold18pt7b);
 	device->setTextColor(ePaper_INVERSE1);
 	device->setRotation(1);
@@ -79,7 +75,6 @@ void loop() {
 	device->print(str);
 	
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 	
 }

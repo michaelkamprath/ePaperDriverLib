@@ -23,18 +23,12 @@
 #ifndef __ePaperDriver__
 #define __ePaperDriver__
 #include <Adafruit_GFX.h>
+#include "ePaperCanvas.h"
 #include "ePaperDeviceModels.h"
 
-// these are the color values supported
-#define ePaper_WHITE	0
-#define ePaper_BLACK	1
-#define ePaper_COLOR	2		// used if the ePaper display ahs a third color
-#define ePaper_INVERSE1	3		// b -> w, w -> b, c -> w
-#define ePaper_INVERSE2	4		// b -> c or w, w -> b, c -> b
-#define ePaper_INVERSE3	5		// b -> w, w -> c or b, c -> b
 
 
-class ePaperDisplay : public Adafruit_GFX {
+class ePaperDisplay : public ePaperCanvas {
 public:
 
 	
@@ -47,10 +41,6 @@ private:
 	
 	const uint8_t *_configuration;
 	const uint8_t _configurationSize;
-
-	uint16_t _bufferSize;
-	uint8_t *_blackBuffer;
-	uint8_t *_colorBuffer;
 	
 	void (*_waitCallbackFunc)(void);
 	
@@ -62,6 +52,7 @@ protected:
 	void sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem, bool invertBits = false ) const;
 	void sendCommandAndDataSequenceFromProgMem( const uint8_t *dataArray, uint16_t arraySize) const;
 
+	void initializeDevice(void) const;
 
 public:
 
@@ -74,23 +65,11 @@ public:
 	);
 	
 	virtual ~ePaperDisplay();
-
-	void initializeDevice(void) const;
-	void powerOn(void) const;
-	void powerOff(void) const;
 	
 	ePaperDeviceModel model(void) const			{ return _model; }
 
 	void setWaitCallBackFunction( void (*fp)(void) )
 												{ _waitCallbackFunc = fp; }
-	//
-	// Adafruit GFX support
-	//
-	
-	virtual void drawPixel(int16_t x, int16_t y, uint16_t color);
-	
-	virtual void fillScreen(uint16_t color);
-	virtual void invertDisplay(boolean i);
 	
 	//
 	//
@@ -98,32 +77,7 @@ public:
 	
 	void refreshDisplay(void);
 	void clearDisplay(void);
-	
-	void setDeviceImage( 
-				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
-				bool blackBitMapIsProgMem
-			);
 
-	void setDeviceImage( 
-				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
-				bool blackBitMapIsProgMem,
-				const uint8_t* colorBitMap,
-				uint16_t colorBitMapSize,
-				bool colorBitMapIsProgMem
-			);
-		
-	void drawBitImage( 
-				int16_t loc_x, int16_t loc_y,
-				int16_t img_w, int16_t img_h,
-				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
-				bool blackBitMapIsProgMem,
-				const uint8_t* colorBitMap,
-				uint16_t colorBitMapSize,
-				bool colorBitMapIsProgMem
-			);
 };
 
 #endif // __ePaperDriver__

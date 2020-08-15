@@ -13,14 +13,12 @@ void setup() {
 #else
 	device = new ePaperDisplay( GDEW0371Z80, 3, 4, 5, 10 );
 #endif
-	device->initializeDevice();	
 }
 
 void loop() {
 	//
 	// demonstrate using the Adafruit GFX primitives to draw an image
 	//
-	device->powerOn();
 	device->setFont(&FreeSansBoldOblique12pt7b);
 	device->setTextColor(ePaper_BLACK);
 	device->setRotation(0);
@@ -54,13 +52,11 @@ void loop() {
 	device->print(str);
 		
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 
 	//
 	// demonstrate drawing to a "rotated" screen
 	//
-	device->powerOn();
 	device->setFont(&FreeSansBold24pt7b);
 	device->setTextColor(ePaper_INVERSE1);
 	device->setRotation(1);
@@ -79,13 +75,11 @@ void loop() {
 	device->print(str);
 	
 	device->refreshDisplay();
-	device->powerOff();
 	delay(10000);
 	
 	//
 	// demonstrate drawing a pixel image to the screen 
 	//
-	device->powerOn();
 	device->setRotation(0);
 	device->clearDisplay(); 
 	device->drawBitImage(
@@ -99,6 +93,5 @@ void loop() {
 		true
 	);
 	device->refreshDisplay();
-	device->powerOff();	
 	delay(10000);
 }
