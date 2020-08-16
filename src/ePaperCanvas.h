@@ -24,15 +24,19 @@ public:
 private:
 	static const uint8_t bitmasks[];
 
-	uint16_t _bufferSize;
+	size_t _bufferSize;
 	uint8_t *_blackBuffer;		// used for b&w
 	uint8_t *_colorBuffer;		// used for bit 2 in color or gray scale displays
 	
 	const ePaperColorMode 	_mode;
 	
+	void getBitSettingsForColor(uint16_t color, bool& blackBit, bool& colorBit );
+	void drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+	void drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+	
 protected:
 	ePaperColorMode getColorMode(void) const		{ return _mode; }
-	uint16_t getBufferrSize(void) const			{ return _bufferSize; }
+	size_t getBufferrSize(void) const			{ return _bufferSize; }
 	const uint8_t *getBuffer1(void) const 		{ return _blackBuffer; }
 	const uint8_t *getBuffer2(void) const 		{ return _colorBuffer; }
 	
@@ -53,6 +57,8 @@ public:
 	void drawPixel(int16_t x, int16_t y, ePaperColorType color);
 	virtual void drawPixel(int16_t x, int16_t y, uint16 color)
 											{ this->drawPixel(x, y, (ePaperColorType)color); }
+	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 	
 	virtual void fillScreen(uint16_t color);
 
@@ -61,16 +67,16 @@ public:
 	// direct image 
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
+				size_t blackBitMapSize,
 				bool blackBitMapIsProgMem
 			);
 
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
+				size_t blackBitMapSize,
 				bool blackBitMapIsProgMem,
 				const uint8_t* colorBitMap,
-				uint16_t colorBitMapSize,
+				size_t colorBitMapSize,
 				bool colorBitMapIsProgMem
 			);
 		
@@ -78,10 +84,10 @@ public:
 				int16_t loc_x, int16_t loc_y,
 				int16_t img_w, int16_t img_h,
 				const uint8_t* blackBitMap,
-				uint16_t blackBitMapSize,
+				size_t blackBitMapSize,
 				bool blackBitMapIsProgMem,
 				const uint8_t* colorBitMap,
-				uint16_t colorBitMapSize,
+				size_t colorBitMapSize,
 				bool colorBitMapIsProgMem
 			);
 

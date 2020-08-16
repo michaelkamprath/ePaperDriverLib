@@ -1,7 +1,7 @@
 #include "ePaperCanvas.h"
 #include "ePaperDeviceConfigurations.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #define DEBUG_PRINTLN(s) Serial.println(s)
@@ -28,7 +28,7 @@ ePaperCanvas::ePaperCanvas(
 		_colorBuffer(NULL),
 		_mode(mode)
 {
-	_bufferSize = width()*((height()+7)/8);
+	_bufferSize = (size_t)width()*(((size_t)height()+7)/8);
 	DEBUG_PRINT("Allocating buffers with size = ");
 	DEBUG_PRINT(_bufferSize);
 	DEBUG_PRINT("\n");
@@ -104,11 +104,13 @@ void ePaperCanvas::drawPixel(int16_t x, int16_t y, ePaperColorType color)
 				}
 				break;
 			case ePaper_COLOR:
-				// make sure black pixel is off
-				_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
-				if (_colorBuffer) {
-					// turn the color on 
-					_colorBuffer[buffer_index] |=  (buffer_bit_mask);
+				if (getColorMode() == CMODE_3COLOR) {
+					// make sure black pixel is off
+					_blackBuffer[buffer_index] &= ~(buffer_bit_mask); 
+					if (_colorBuffer) {
+						// turn the color on 
+						_colorBuffer[buffer_index] |=  (buffer_bit_mask);
+					}
 				}
 				break;
 			case ePaper_INVERSE1:
@@ -171,6 +173,39 @@ void ePaperCanvas::drawPixel(int16_t x, int16_t y, ePaperColorType color)
 	yield();
 }
 
+void ePaperCanvas::getBitSettingsForColor(uint16_t color, bool& blackBit, bool& colorBit )
+{
+	blackBit = false;
+	colorBit = false;
+	
+	switch (color) {
+		case ePaper_WHITE:
+			break;
+		case ePaper_BLACK:
+			blackBit = true;
+			break;
+		case ePaper_COLOR:
+			if (getColorMode() == CMODE_3COLOR) {
+				colorBit = true;
+			}
+			break;
+		case ePaper_GRAY1:
+			if (getColorMode() == CMODE_4GRAY) {
+				blackBit = false;
+				colorBit = true;
+			}
+			break;
+		case ePaper_GRAY2:
+			if (getColorMode() == CMODE_4GRAY) {
+				blackBit = true;
+				colorBit = false;
+			}
+			break;
+		default:
+			// this method really should be called for other colors
+			break;
+	}
+}
 void ePaperCanvas::fillScreen(uint16_t color)
 {
 	uint8_t blackByte = 0;
@@ -178,12 +213,14 @@ void ePaperCanvas::fillScreen(uint16_t color)
 
 	switch (color) {
 		case ePaper_WHITE:
-			break;
 		case ePaper_BLACK:
-			blackByte = 0xFF;
-			break;
 		case ePaper_COLOR:
-			colorByte = 0xFF;
+		case ePaper_GRAY1:
+		case ePaper_GRAY2:
+			bool blackBitOn, colorBitOn;
+			getBitSettingsForColor(color, blackBitOn, colorBitOn);
+			blackByte = blackBitOn ? 0xFF : 0x00;
+			colorByte = colorBitOn ? 0xFF : 0x00;
 			break;
 		default:
 		case ePaper_INVERSE1:
@@ -202,6 +239,181 @@ void ePaperCanvas::fillScreen(uint16_t color)
 		memset(_colorBuffer, colorByte, _bufferSize);
 	}
 	endWrite();
+}
+
+void ePaperCanvas::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+	if (getRotation() == 0) {
+		drawFastRawVLine(x, y, h, color);
+	} else if (getRotation() == 1) {
+		int16_t t = x;
+		x = WIDTH - 1 - y;
+		y = t;
+		x -= h;
+		drawFastRawHLine(x, y, h, color);
+	} else if (getRotation() == 2) {
+		x = WIDTH - 1 - x;
+      	y = HEIGHT - 1 - y;
+      	
+      	y -= h;
+      	drawFastRawVLine(x, y, h, color);
+	} else if (getRotation() == 3) {
+		int16_t t = x;
+		x = y;
+		y = HEIGHT - 1 - t;
+		drawFastRawHLine(x, y, h, color);
+	} else {
+		this->Adafruit_GFX::drawFastVLine(x, y, h, color);
+	}
+}
+
+void ePaperCanvas::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+	if (getRotation() == 0) {
+		drawFastRawHLine(x, y, w, color);
+	} else if (getRotation() == 1) {
+		int16_t t = x;
+		x = WIDTH - 1 - y;
+		y = t;
+		drawFastRawVLine(x, y, w, color);
+	} else if (getRotation() == 2) {
+		x = WIDTH - 1 - x;
+      	y = HEIGHT - 1 - y;
+      	
+      	x -= w;
+      	drawFastRawHLine(x, y, w, color);
+	} else if (getRotation() == 3) {
+		int16_t t = x;
+		x = y;
+		y = HEIGHT - 1 - t;
+		y -= w;
+		drawFastRawVLine(x, y, w, color);
+	} else {
+		this->Adafruit_GFX::drawFastHLine(x, y, w, color);
+	}
+}
+
+void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+	// should not be called for inverse colors
+	if ((color == ePaper_INVERSE1)||(color == ePaper_INVERSE2)||(color == ePaper_INVERSE3)) {
+		return;
+	}
+		
+	// first determine bit settings for color:
+	bool blackBitOn, colorBitOn;
+	getBitSettingsForColor(color, blackBitOn, colorBitOn);
+	
+	// calculate start bye and subbit
+	size_t start_buffer_index = (y*WIDTH + x)/8;
+	int8_t start_sub_bit = (7-(y*WIDTH + x)&7);
+
+	// calculate bit mask
+	uint8_t byte_bit_mask = ePaperCanvas::bitmasks[start_sub_bit];
+	
+	// repeatedly apply the bit mask for each row
+	size_t row_bytes = WIDTH/8;
+	for (int16_t i = 0; i < h; i++) {
+		size_t buffer_index = start_buffer_index + i*row_bytes;
+		if (blackBitOn) {
+			_blackBuffer[buffer_index] |= byte_bit_mask;
+		} else {
+			_blackBuffer[buffer_index] &= (~byte_bit_mask);
+		}
+	
+		if (_colorBuffer) {
+			if (colorBitOn) {
+				_colorBuffer[buffer_index] |= byte_bit_mask;
+			} else {
+				_colorBuffer[buffer_index] &= (~byte_bit_mask);
+			}
+		}
+	}
+	DEBUG_PRINTLN("    done");
+}
+
+void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+{
+	// should not be called for inverse colors
+	if ((color == ePaper_INVERSE1)||(color == ePaper_INVERSE2)||(color == ePaper_INVERSE3)) {
+		return;
+	}
+		
+	// first determine bit settings for color:
+	bool blackBitOn, colorBitOn;
+	getBitSettingsForColor(color, blackBitOn, colorBitOn);
+	
+	// calculate start bye and subbit
+	size_t start_bit_index = (y*WIDTH + x);
+	size_t remainingWidthBits = w;
+	size_t start_buffer_index = start_bit_index/8;
+	
+	// handle the sub-bit of the first byte if needed
+	if (start_bit_index%8 > 0) {
+		int8_t start_sub_bit = (7-(y*WIDTH + x)&7);
+	
+		// create bit mask for first byte
+		uint8_t start_byte_bit_mask = 0x00;
+	
+		for (int8_t i = start_sub_bit; ((i >= 0)&&(remainingWidthBits > 0)); i--) {
+			start_byte_bit_mask |= ePaperCanvas::bitmasks[i];
+			remainingWidthBits--;
+		}
+	
+		// set the start byte 
+	
+		if (blackBitOn) {
+			_blackBuffer[start_buffer_index] |= start_byte_bit_mask;
+		} else {
+			_blackBuffer[start_buffer_index] &= (~start_byte_bit_mask);
+		}
+	
+		if (_colorBuffer) {
+			if (colorBitOn) {
+				_colorBuffer[start_buffer_index] |= start_byte_bit_mask;
+			} else {
+				_colorBuffer[start_buffer_index] &= (~start_byte_bit_mask);
+			}
+		}
+		start_buffer_index++;
+	}
+	
+	// do the next remainingWidthBits bits
+	if (remainingWidthBits > 0 ) {
+		size_t remainingWholeBytes = remainingWidthBits/8;
+		size_t lastByteBits = remainingWidthBits%8;
+
+		uint8_t blackByte = blackBitOn ? 0xFF : 0x00;
+		uint8_t colorByte = colorBitOn ? 0xFF : 0x00;
+	
+		// set the remaining whole bytes
+		for (size_t i = start_buffer_index;
+				i < start_buffer_index + remainingWholeBytes;
+				i++
+		) {
+			_blackBuffer[i] = blackByte;
+			if (_colorBuffer) {
+				_colorBuffer[i] = colorByte;
+			}
+		}
+		
+		// set the last byte's left bits
+		if (lastByteBits > 0) {
+			uint8_t last_byte_bit_mask = 0x00;
+			for (int8_t i = 7; i >= 7-(int8_t)lastByteBits; i--) {
+				last_byte_bit_mask |= ePaperCanvas::bitmasks[i];
+			}
+			if (blackBitOn) {
+				_blackBuffer[start_buffer_index + remainingWholeBytes] |= last_byte_bit_mask;
+			} else {
+				_blackBuffer[start_buffer_index + remainingWholeBytes] &= (~last_byte_bit_mask);
+			}
+			if (_colorBuffer) {
+				if (colorBitOn) {
+					_colorBuffer[start_buffer_index + remainingWholeBytes] |= last_byte_bit_mask;
+				} else {
+					_colorBuffer[start_buffer_index + remainingWholeBytes] &= (~last_byte_bit_mask);
+				}
+			}
+		}
+	}
 }
 
 void  ePaperCanvas::invertDisplay(boolean i)
@@ -232,7 +444,7 @@ void  ePaperCanvas::invertDisplay(boolean i)
 */
 void ePaperCanvas::setDeviceImage( 
 	const uint8_t* blackBitMap,
-	uint16_t blackBitMapSize,
+	size_t blackBitMapSize,
 	bool blackBitMapIsProgMem
 )
 {
@@ -255,10 +467,10 @@ void ePaperCanvas::setDeviceImage(
 */
 void ePaperCanvas::setDeviceImage( 
 	const uint8_t* blackBitMap,
-	uint16_t blackBitMapSize,
+	size_t blackBitMapSize,
 	bool blackBitMapIsProgMem,
 	const uint8_t* colorBitMap,
-	uint16_t colorBitMapSize,
+	size_t colorBitMapSize,
 	bool colorBitMapIsProgMem
 )
 {
@@ -283,10 +495,10 @@ void ePaperCanvas::drawBitImage(
 	int16_t loc_x, int16_t loc_y,
 	int16_t img_w, int16_t img_h,
 	const uint8_t* blackBitMap,
-	uint16_t blackBitMapSize,
+	size_t blackBitMapSize,
 	bool blackBitMapIsProgMem,
 	const uint8_t* colorBitMap,
-	uint16_t colorBitMapSize,
+	size_t colorBitMapSize,
 	bool colorBitMapIsProgMem
 )
 {
