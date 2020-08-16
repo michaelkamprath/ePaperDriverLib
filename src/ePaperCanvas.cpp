@@ -326,7 +326,6 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 			}
 		}
 	}
-	DEBUG_PRINTLN("    done");
 }
 
 void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
