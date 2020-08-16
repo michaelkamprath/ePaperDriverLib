@@ -339,5 +339,6 @@ void ePaperCanvas::drawBitImage(
 				}
 			}
 		}
+		yield();
 	}
 }	

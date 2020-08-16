@@ -163,11 +163,11 @@ const uint8_t deviceConfiguration_GDEW0371W7[] PROGMEM =
 {
 	// power settings
 	0, 0x01,
-	4, 0x07, 0x07, 0x3f, 0x3f,
+	4, 0x07, 0x07, 0x3F, 0x3F,
 
 	// booster soft start
 	0,	0x06,
-	3,	0x17,	0x17,	0x1d,
+	3,	0x17,	0x17,	0x1D,
 
 	// power on command. Always "wait for ready" after this sequence
 	0,	0x04,
@@ -272,15 +272,15 @@ const uint8_t setImage_CMD_GDEW0371W7[] PROGMEM = {
 	0xFF,
 	
 	//VCOM AND DATA INTERVAL SETTING
-	0, 0X50,
-	1, 0xf7,
+	0, 0x50,
+	1, 0xF7,
 	
 	//power off
-	0, 0X02,
+	0, 0x02,
 	0xff,
 	
 	//deep sleep
-	0, 0X07,
+	0, 0x07,
 	1, 0xA5,
 };
 
