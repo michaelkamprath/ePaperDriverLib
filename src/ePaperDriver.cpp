@@ -72,29 +72,29 @@ ePaperDisplay::ePaperDisplay(
 	SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 	SPI.begin();
 	
-	DEBUG_PRINTLN("ePaperDisplay object constructed");
-	DEBUG_PRINT("_deviceReadyPin = ");
+	DEBUG_PRINTLN(F("ePaperDisplay object constructed"));
+	DEBUG_PRINT(F("_deviceReadyPin = "));
 	DEBUG_PRINT(_deviceReadyPin);	
-	DEBUG_PRINT(", _deviceResetPin = ");
+	DEBUG_PRINT(F(", _deviceResetPin = "));
 	DEBUG_PRINT(_deviceResetPin);	
-	DEBUG_PRINT(", _deviceDataCommandPin = ");
+	DEBUG_PRINT(F(", _deviceDataCommandPin = "));
 	DEBUG_PRINT(_deviceDataCommandPin);	
-	DEBUG_PRINT(", _deviceSelectPin = ");
+	DEBUG_PRINT(F(", _deviceSelectPin = "));
 	DEBUG_PRINT(_deviceSelectPin);	
-	DEBUG_PRINT("\n\n");	
+	DEBUG_PRINT(F("\n\n"));	
 	
 	// test malloc success
-	DEBUG_PRINTLN("Testing initial malloc success ...");
+	DEBUG_PRINTLN(F("Testing initial malloc success ..."));
 
 	if (this->getBuffer1()) {
-		DEBUG_PRINTLN("SUCCESS - getBuffer1 malloc");
+		DEBUG_PRINTLN(F("SUCCESS - getBuffer1 malloc"));
 	} else {
-		DEBUG_PRINTLN("FAIL - getBuffer1 malloc");
+		DEBUG_PRINTLN(F("FAIL - getBuffer1 malloc"));
 	}
 	if (this->getBuffer2()) {
-		DEBUG_PRINTLN("SUCCESS - getBuffer2 malloc");
+		DEBUG_PRINTLN(F("SUCCESS - getBuffer2 malloc"));
 	} else {
-		DEBUG_PRINTLN("FAIL - getBuffer2 malloc");
+		DEBUG_PRINTLN(F("FAIL - getBuffer2 malloc"));
 	}
 }
 
@@ -106,9 +106,9 @@ void ePaperDisplay::waitForReady(void) const
 {
 	uint8_t busyValue = ePaperDeviceConfigurations::deviceBusyValue(model());
 	
-	DEBUG_PRINT("Waiting until epaper device is complete with busy value = ");
+	DEBUG_PRINT(F("Waiting until epaper device is complete with busy value = "));
 	DEBUG_PRINT(busyValue);
-	DEBUG_PRINT(" : .");
+	DEBUG_PRINT(F(" : ."));
 	
 	sendCommand(0x71);
 	while (busyValue == digitalRead(_deviceReadyPin)) {
@@ -117,12 +117,12 @@ void ePaperDisplay::waitForReady(void) const
 		DEBUG_PRINT(".");
 		sendCommand(0x71);
 	}
-	DEBUG_PRINT("  Done!\n");
+	DEBUG_PRINT(F("  Done!\n"));
 }
 
 void ePaperDisplay::resetDriver(void) const
 {
-	DEBUG_PRINTLN("reset driver");
+	DEBUG_PRINTLN(F("reset driver"));
 	digitalWrite(_deviceResetPin, LOW);
 	delay(200);
 	digitalWrite(_deviceResetPin, HIGH);
@@ -131,9 +131,11 @@ void ePaperDisplay::resetDriver(void) const
 
 void ePaperDisplay::sendCommand( uint8_t cmd ) const
 {
-	DEBUG_PRINT("Sending command to device: 0x");
-	DEBUG_PRINTFORMAT(cmd, HEX);
-	DEBUG_PRINT("\n");
+	if (cmd != 0x71) {
+		DEBUG_PRINT(F("Sending command to device: 0x"));
+		DEBUG_PRINTFORMAT(cmd, HEX);
+		DEBUG_PRINT(F("\n"));
+	}
 	digitalWrite(_deviceDataCommandPin, LOW);
 	digitalWrite(_deviceSelectPin, LOW);
 	SPI.transfer(cmd);
@@ -142,7 +144,7 @@ void ePaperDisplay::sendCommand( uint8_t cmd ) const
 
 void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool isProgMem, bool invertBits ) const
 {
-	DEBUG_PRINTLN("Sending data to device...");
+	DEBUG_PRINTLN(F("Sending data to device..."));
 	digitalWrite(_deviceDataCommandPin, HIGH);
 	for (uint16_t i = 0; i < arraySize; i++ ) {
 		digitalWrite(_deviceSelectPin, LOW);
@@ -159,7 +161,7 @@ void ePaperDisplay::sendData( const uint8_t *dataArray, uint16_t arraySize, bool
 		digitalWrite(_deviceSelectPin, HIGH);
 		yield();
 	}
-	DEBUG_PRINTLN("    Done sending data to device.");
+	DEBUG_PRINTLN(F("    Done sending data to device."));
 }
 
 /****************************
@@ -214,9 +216,9 @@ void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataAr
 		} else if (b == 0xFE) {
 			index++;
 			uint8_t delay_millis = pgm_read_byte(&dataArray[index]);
-			DEBUG_PRINT("Delaying for ");
+			DEBUG_PRINT(F("Delaying for "));
 			DEBUG_PRINT(delay_millis);
-			DEBUG_PRINT(" milliseconds\n");
+			DEBUG_PRINT(F(" milliseconds\n"));
 			delay(delay_millis);
 			index++;
 		} else if (b == 0xFD ) {
@@ -248,14 +250,14 @@ void ePaperDisplay::sendCommandAndDataSequenceFromProgMem( const uint8_t *dataAr
 
 void ePaperDisplay::initializeDevice(void) const
 {
-	DEBUG_PRINTLN("powering up device");
-	DEBUG_PRINTLN("resetting driver");
+	DEBUG_PRINTLN(F("powering up device"));
+	DEBUG_PRINTLN(F("resetting driver"));
 	resetDriver();
-	DEBUG_PRINT("sending configuration with size = ");
+	DEBUG_PRINT(F("sending configuration with size = "));
 	DEBUG_PRINT(_configurationSize);
-	DEBUG_PRINT("\n");
+	DEBUG_PRINT(F("\n"));
 	sendCommandAndDataSequenceFromProgMem(_configuration, _configurationSize);	
-	DEBUG_PRINTLN("done setting up device.\n");
+	DEBUG_PRINTLN(F("done setting up device.\n"));
 }
 
 /*!
@@ -268,7 +270,7 @@ void ePaperDisplay::initializeDevice(void) const
 void ePaperDisplay::refreshDisplay(void)
 {
 	initializeDevice();
-	DEBUG_PRINTLN("Starting display refresh sequence.");
+	DEBUG_PRINTLN(F("Starting display refresh sequence."));
 	sendCommandAndDataSequenceFromProgMem(
 		ePaperDeviceConfigurations::setImageAndRefreshCMD(model()),
 		ePaperDeviceConfigurations::setImageAndRefreshCMDSize(model())
@@ -286,5 +288,5 @@ void ePaperDisplay::refreshDisplay(void)
 void ePaperDisplay::clearDisplay(void)
 {
 	fillScreen(ePaper_WHITE);
-	DEBUG_PRINTLN("Done clearing screen");
+	DEBUG_PRINTLN(F("Done clearing screen"));
 }

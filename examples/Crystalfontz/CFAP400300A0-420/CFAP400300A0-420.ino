@@ -63,8 +63,8 @@ void loop() {
 	device->clearDisplay();
 	device->fillTriangle(
 		0, 0,
-		device->width(), 0,
-		0, device->height(),
+		device->width()-1, 0,
+		0, device->height()-1,
 		ePaper_COLOR		
 	);
 	

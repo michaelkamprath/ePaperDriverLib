@@ -7,6 +7,7 @@ ePaperDisplay *device;
 
 void setup() {
 	Serial.begin(115200);
+	delay(500);
 #if defined( ESP8266 )
 	device = new ePaperDisplay( GDEW0371W7, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
@@ -55,6 +56,10 @@ void loop() {
 	device->refreshDisplay();
 	delay(10000);
 
+	// clean screen
+	device->clearDisplay();
+	device->refreshDisplay();
+
 	//
 	// demonstrate drawing to a "rotated" screen
 	//
@@ -64,14 +69,14 @@ void loop() {
 	device->clearDisplay();
 	device->fillTriangle(
 		0, 0,
-		device->width(), 0,
-		0, device->height(),
+		device->width()-1, 0,
+		0, device->height()-1,
 		ePaper_GRAY2		
 	);
 	device->fillTriangle(
-		0, device->height(),
-		device->width(), 0,
-		device->width(), device->height(),
+		0, device->height()-1,
+		device->width()-1, 0,
+		device->width()-1, device->height()-1,
 		ePaper_GRAY1		
 	);
 	

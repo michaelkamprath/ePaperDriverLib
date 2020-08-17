@@ -1,7 +1,7 @@
 #include "ePaperCanvas.h"
 #include "ePaperDeviceConfigurations.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define DEBUG_PRINTLN(s) Serial.println(s)
@@ -28,13 +28,45 @@ ePaperCanvas::ePaperCanvas(
 		_colorBuffer(NULL),
 		_mode(mode)
 {
+	DEBUG_PRINT(F("Creating ePaperCanvas object with w = "));
+	DEBUG_PRINT(w);
+	DEBUG_PRINT(F(", h = "));
+	DEBUG_PRINT(h);
+	DEBUG_PRINT(F(", mode = "));
+	switch (_mode) {
+		case CMODE_BW:
+			DEBUG_PRINT(F("Black & White"));
+			break;
+		case CMODE_3COLOR:
+			DEBUG_PRINT(F("3-Color"));
+			break;
+		case CMODE_4GRAY:
+			DEBUG_PRINT(F("4 Gray Scale"));
+			break;
+		default:
+			DEBUG_PRINT(F("UNKNOWN"));
+			break;
+
+	}
+	DEBUG_PRINT(F("\n"));
+	
 	_bufferSize = (size_t)width()*(((size_t)height()+7)/8);
-	DEBUG_PRINT("Allocating buffers with size = ");
+	DEBUG_PRINT(F("    Allocating buffers with size = "));
 	DEBUG_PRINT(_bufferSize);
-	DEBUG_PRINT("\n");
+	DEBUG_PRINT(F("\n"));
 	_blackBuffer = (uint8_t *)malloc(_bufferSize);
+	if (_blackBuffer) {
+		DEBUG_PRINTLN(F("    Black buffer successfully allocated."));
+	} else {
+		DEBUG_PRINTLN(F("    ERROR - Black buffer NOT successfully allocated."));
+	}
 	if (_mode != CMODE_BW) {
 		_colorBuffer = (uint8_t *)malloc(_bufferSize);
+		if (_colorBuffer) {
+			DEBUG_PRINTLN(F("    Color buffer successfully allocated."));
+		} else {
+			DEBUG_PRINTLN(F("    ERROR - Color buffer NOT successfully allocated."));
+		}
 	}
 }
 		
@@ -183,6 +215,9 @@ void ePaperCanvas::getBitSettingsForColor(uint16_t color, bool& blackBit, bool& 
 			break;
 		case ePaper_BLACK:
 			blackBit = true;
+			if (getColorMode() == CMODE_4GRAY) {
+				colorBit = true;
+			}
 			break;
 		case ePaper_COLOR:
 			if (getColorMode() == CMODE_3COLOR) {
@@ -296,7 +331,7 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 	if ((color == ePaper_INVERSE1)||(color == ePaper_INVERSE2)||(color == ePaper_INVERSE3)) {
 		return;
 	}
-		
+	
 	// first determine bit settings for color:
 	bool blackBitOn, colorBitOn;
 	getBitSettingsForColor(color, blackBitOn, colorBitOn);
@@ -313,6 +348,25 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 	size_t row_bytes = WIDTH/8;
 	for (int16_t i = 0; i < h; i++) {
 		size_t buffer_index = start_buffer_index + i*row_bytes;
+		
+		if (buffer_index >= _bufferSize) {
+			DEBUG_PRINT(F("WARNING - Buffer index exceeded buffer size in ePaperCanvas::drawFastRawVLine(). x = "));
+			DEBUG_PRINT(x);
+			DEBUG_PRINT(F(", y = "));
+			DEBUG_PRINT(y);
+			DEBUG_PRINT(F(", h = "));
+			DEBUG_PRINT(h);
+			DEBUG_PRINT(F(", color = "));
+			DEBUG_PRINT(color);
+			DEBUG_PRINT(F(", iteration idx = "));
+			DEBUG_PRINT(i);
+			DEBUG_PRINT(F(", buffer_index = "));
+			DEBUG_PRINT(buffer_index);
+			DEBUG_PRINT(F("\n"));
+			yield();
+			return;
+		}
+		
 		if (blackBitOn) {
 			_blackBuffer[buffer_index] |= byte_bit_mask;
 		} else {
@@ -326,6 +380,7 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 				_colorBuffer[buffer_index] &= (~byte_bit_mask);
 			}
 		}
+		yield();
 	}
 }
 
@@ -339,12 +394,27 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t co
 	// first determine bit settings for color:
 	bool blackBitOn, colorBitOn;
 	getBitSettingsForColor(color, blackBitOn, colorBitOn);
-	
+
 	// calculate start bye and subbit
 	size_t start_bit_index = (y*WIDTH + x);
 	size_t remainingWidthBits = w;
 	size_t start_buffer_index = start_bit_index/8;
 	
+	if (start_buffer_index >= _bufferSize) {
+		DEBUG_PRINT(F("WARNING - Start buffer index exceeded buffer size in ePaperCanvas::drawFastRawHLine(). x = "));
+		DEBUG_PRINT(x);
+		DEBUG_PRINT(F(", y = "));
+		DEBUG_PRINT(y);
+		DEBUG_PRINT(F(", w = "));
+		DEBUG_PRINT(w);
+		DEBUG_PRINT(F(", color = "));
+		DEBUG_PRINT(color);
+		DEBUG_PRINT(F(", start_buffer_index = "));
+		DEBUG_PRINT(start_buffer_index);
+		DEBUG_PRINT(F("\n"));
+		yield();
+		return;
+	}
 	// handle the sub-bit of the first byte if needed
 	if (start_bit_index%8 > 0) {
 		int8_t start_sub_bit = (7-start_bit_index&7);
@@ -388,14 +458,48 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t co
 				i < start_buffer_index + remainingWholeBytes;
 				i++
 		) {
+			if (i >= _bufferSize) {
+				DEBUG_PRINT(F("WARNING - Iteration buffer index exceeded buffer size in ePaperCanvas::drawFastRawHLine(). x = "));
+				DEBUG_PRINT(x);
+				DEBUG_PRINT(F(", y = "));
+				DEBUG_PRINT(y);
+				DEBUG_PRINT(F(", w = "));
+				DEBUG_PRINT(w);
+				DEBUG_PRINT(F(", color = "));
+				DEBUG_PRINT(color);
+				DEBUG_PRINT(F(", iteration index = "));
+				DEBUG_PRINT(i);
+				DEBUG_PRINT(F("\n"));
+				yield();
+				return;
+			}
+		
 			_blackBuffer[i] = blackByte;
 			if (_colorBuffer) {
 				_colorBuffer[i] = colorByte;
 			}
+			yield();
 		}
 		
 		// set the last byte's left bits
 		if (lastByteBits > 0) {
+			if (start_buffer_index + remainingWholeBytes >= _bufferSize) {
+				DEBUG_PRINT(F("WARNING - Last byte index exceeded buffer size in ePaperCanvas::drawFastRawHLine(). x = "));
+				DEBUG_PRINT(x);
+				DEBUG_PRINT(F(", y = "));
+				DEBUG_PRINT(y);
+				DEBUG_PRINT(F(", w = "));
+				DEBUG_PRINT(w);
+				DEBUG_PRINT(F(", color = "));
+				DEBUG_PRINT(color);
+				DEBUG_PRINT(F(", last byte index = "));
+				DEBUG_PRINT(start_buffer_index + remainingWholeBytes);
+				DEBUG_PRINT(F("\n"));
+				yield();
+				return;
+			}
+
+
 			uint8_t last_byte_bit_mask = 0x00;
 			for (int8_t i = 7; i >= 7-(int8_t)lastByteBits; i--) {
 				last_byte_bit_mask |= ePaperCanvas::bitmasks[i];
