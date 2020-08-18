@@ -99,7 +99,7 @@ void ePaperCanvas::drawPixel(int16_t x, int16_t y, ePaperColorType color)
 				break;
 		}
 		size_t buffer_index = (y*WIDTH + x)/8;
-		int8_t buffer_bit_mask = (1 << (7-(y*WIDTH + x)&7));
+		int8_t buffer_bit_mask = (1 << ((7-(y*WIDTH + x))&7));
 
 		switch(color) {
 			case ePaper_WHITE:
@@ -339,7 +339,7 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 	// calculate start bye and subbit
 	size_t start_bit_index = (y*WIDTH + x);
 	size_t start_buffer_index = start_bit_index/8;
-	int8_t start_sub_bit = (7-start_bit_index&7);
+	int8_t start_sub_bit = ((7-start_bit_index)&7);
 
 	// calculate bit mask
 	uint8_t byte_bit_mask = ePaperCanvas::bitmasks[start_sub_bit];
@@ -417,7 +417,7 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t co
 	}
 	// handle the sub-bit of the first byte if needed
 	if (start_bit_index%8 > 0) {
-		int8_t start_sub_bit = (7-start_bit_index&7);
+		int8_t start_sub_bit = ((7-start_bit_index)&7);
 	
 		// create bit mask for first byte
 		uint8_t start_byte_bit_mask = 0x00;
@@ -611,7 +611,7 @@ void ePaperCanvas::drawBitImage(
 		for (int16_t j = 0; j < img_h; j++ ) {
 			size_t bit_index = (j*img_w + i);
 			size_t buffer_index = bit_index/8;
-			int8_t buffer_bit_mask = (1 << (7-bit_index&7));
+			int8_t buffer_bit_mask = (1 << ((7-bit_index)&7));
 			
 			if (blackBitMap && colorBitMap && (getColorMode() == CMODE_4GRAY)) {
 				// in 4 gray mode need to interpret the bits
