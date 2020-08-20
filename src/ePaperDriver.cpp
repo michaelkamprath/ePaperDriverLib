@@ -96,6 +96,7 @@ ePaperDisplay::ePaperDisplay(
 	} else {
 		DEBUG_PRINTLN(F("FAIL - getBuffer2 malloc"));
 	}
+	_waitCallbackFunc = nullptr;
 }
 
 ePaperDisplay::~ePaperDisplay()
