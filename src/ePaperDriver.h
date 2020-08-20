@@ -55,7 +55,6 @@ protected:
 	void initializeDevice(void) const;
 
 public:
-
 	ePaperDisplay(
 		ePaperDeviceModel model,
 		int deviceReadyPin,

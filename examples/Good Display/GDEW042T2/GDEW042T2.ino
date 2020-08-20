@@ -11,6 +11,8 @@ void setup() {
 	device = new ePaperDisplay( GDEW042T2, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
 	device = new ePaperDisplay( GDEW042T2, 21, 2, 4, 5 );
+#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
+	// The ATmega1284 doesn't have enough RAM for this device
 #else
 	device = new ePaperDisplay( GDEW042T2, 3, 4, 5, 10 );
 #endif

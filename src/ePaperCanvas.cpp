@@ -50,7 +50,7 @@ ePaperCanvas::ePaperCanvas(
 	}
 	DEBUG_PRINT(F("\n"));
 	
-	_bufferSize = (size_t)width()*(((size_t)height()+7)/8);
+	_bufferSize = (int32_t)width()*(((int32_t)height()+7)/8);
 	DEBUG_PRINT(F("    Allocating buffers with size = "));
 	DEBUG_PRINT(_bufferSize);
 	DEBUG_PRINT(F("\n"));
@@ -98,9 +98,10 @@ void ePaperCanvas::drawPixel(int16_t x, int16_t y, ePaperColorType color)
 				y = HEIGHT - y - 1;
 				break;
 		}
-		size_t buffer_index = (y*WIDTH + x)/8;
+		uint32_t bit_index = ((int32_t)y*WIDTH + x);
+		uint32_t buffer_index = bit_index/8;
 		int8_t buffer_bit_mask = (1 << ((7-(y*WIDTH + x))&7));
-
+		
 		switch(color) {
 			case ePaper_WHITE:
 				// setting white is turning the black pixel off
@@ -353,17 +354,17 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, ePaperColor
 	getBitSettingsForColor(color, blackBitOn, colorBitOn);
 	
 	// calculate start bye and subbit
-	size_t start_bit_index = (y*WIDTH + x);
-	size_t start_buffer_index = start_bit_index/8;
+	uint32_t start_bit_index = (uint32_t)y*WIDTH + x;
+	uint32_t start_buffer_index = start_bit_index/8;
 	int8_t start_sub_bit = ((7-start_bit_index)&7);
 
 	// calculate bit mask
 	uint8_t byte_bit_mask = ePaperCanvas::bitmasks[start_sub_bit];
-	
+
 	// repeatedly apply the bit mask for each row
-	size_t row_bytes = WIDTH/8;
+	uint32_t row_bytes = WIDTH/8;
 	for (int16_t i = 0; i < h; i++) {
-		size_t buffer_index = start_buffer_index + i*row_bytes;
+		uint32_t buffer_index = start_buffer_index + i*row_bytes;
 		
 		if (buffer_index >= _bufferSize) {
 			DEBUG_PRINT(F("WARNING - Buffer index exceeded buffer size in ePaperCanvas::drawFastRawVLine(). x = "));
@@ -412,9 +413,9 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, ePaperColor
 	getBitSettingsForColor(color, blackBitOn, colorBitOn);
 
 	// calculate start bye and subbit
-	size_t start_bit_index = (y*WIDTH + x);
-	size_t remainingWidthBits = w;
-	size_t start_buffer_index = start_bit_index/8;
+	uint32_t start_bit_index = (y*WIDTH + x);
+	uint32_t remainingWidthBits = w;
+	uint32_t start_buffer_index = start_bit_index/8;
 	
 	if (start_buffer_index >= _bufferSize) {
 		DEBUG_PRINT(F("WARNING - Start buffer index exceeded buffer size in ePaperCanvas::drawFastRawHLine(). x = "));
@@ -463,14 +464,14 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, ePaperColor
 	
 	// do the next remainingWidthBits bits
 	if (remainingWidthBits > 0 ) {
-		size_t remainingWholeBytes = remainingWidthBits/8;
-		size_t lastByteBits = remainingWidthBits%8;
+		uint32_t remainingWholeBytes = remainingWidthBits/8;
+		uint32_t lastByteBits = remainingWidthBits%8;
 
 		uint8_t blackByte = blackBitOn ? 0xFF : 0x00;
 		uint8_t colorByte = colorBitOn ? 0xFF : 0x00;
 	
 		// set the remaining whole bytes
-		for (size_t i = start_buffer_index;
+		for (int32_t i = start_buffer_index;
 				i < start_buffer_index + remainingWholeBytes;
 				i++
 		) {
@@ -564,7 +565,7 @@ void  ePaperCanvas::invertDisplay(boolean i)
 */
 void ePaperCanvas::setDeviceImage( 
 	const uint8_t* blackBitMap,
-	size_t blackBitMapSize,
+	uint32_t blackBitMapSize,
 	bool blackBitMapIsProgMem
 )
 {
@@ -587,10 +588,10 @@ void ePaperCanvas::setDeviceImage(
 */
 void ePaperCanvas::setDeviceImage( 
 	const uint8_t* blackBitMap,
-	size_t blackBitMapSize,
+	uint32_t blackBitMapSize,
 	bool blackBitMapIsProgMem,
 	const uint8_t* colorBitMap,
-	size_t colorBitMapSize,
+	uint32_t colorBitMapSize,
 	bool colorBitMapIsProgMem
 )
 {
@@ -615,18 +616,18 @@ void ePaperCanvas::drawBitImage(
 	int16_t loc_x, int16_t loc_y,
 	int16_t img_w, int16_t img_h,
 	const uint8_t* blackBitMap,
-	size_t blackBitMapSize,
+	uint32_t blackBitMapSize,
 	bool blackBitMapIsProgMem,
 	const uint8_t* colorBitMap,
-	size_t colorBitMapSize,
+	uint32_t colorBitMapSize,
 	bool colorBitMapIsProgMem
 )
 {
 
 	for (int16_t i = 0; i < img_w; i++ ) {
 		for (int16_t j = 0; j < img_h; j++ ) {
-			size_t bit_index = (j*img_w + i);
-			size_t buffer_index = bit_index/8;
+			uint32_t bit_index = (j*img_w + i);
+			uint32_t buffer_index = bit_index/8;
 			int8_t buffer_bit_mask = (1 << ((7-bit_index)&7));
 			
 			if (blackBitMap && colorBitMap && (getColorMode() == CMODE_4GRAY)) {

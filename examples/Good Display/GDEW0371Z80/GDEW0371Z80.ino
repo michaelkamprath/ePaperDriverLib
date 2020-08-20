@@ -10,6 +10,9 @@ void setup() {
 	device = new ePaperDisplay( GDEW0371Z80, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
 	device = new ePaperDisplay( GDEW0371Z80, 21, 2, 4, 5 );
+#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
+	// assume using MightyCore for the ATmega1284
+	device = new ePaperDisplay( GDEW0371Z80, PIN_PB1, PIN_PB2, PIN_PB3, PIN_PB4 );
 #else
 	device = new ePaperDisplay( GDEW0371Z80, 3, 4, 5, 10 );
 #endif

@@ -24,7 +24,7 @@ public:
 private:
 	static const uint8_t bitmasks[];
 
-	size_t _bufferSize;
+	uint32_t _bufferSize;
 	uint8_t *_blackBuffer;		// used for b&w
 	uint8_t *_colorBuffer;		// used for bit 2 in color or gray scale displays
 	
@@ -36,7 +36,7 @@ private:
 	
 protected:
 	ePaperColorMode getColorMode(void) const		{ return _mode; }
-	size_t getBufferrSize(void) const			{ return _bufferSize; }
+	uint32_t getBufferrSize(void) const			{ return _bufferSize; }
 	const uint8_t *getBuffer1(void) const 		{ return _blackBuffer; }
 	const uint8_t *getBuffer2(void) const 		{ return _colorBuffer; }
 	
@@ -67,16 +67,16 @@ public:
 	// direct image 
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,
-				size_t blackBitMapSize,
+				uint32_t blackBitMapSize,
 				bool blackBitMapIsProgMem
 			);
 
 	void setDeviceImage( 
 				const uint8_t* blackBitMap,
-				size_t blackBitMapSize,
+				uint32_t blackBitMapSize,
 				bool blackBitMapIsProgMem,
 				const uint8_t* colorBitMap,
-				size_t colorBitMapSize,
+				uint32_t colorBitMapSize,
 				bool colorBitMapIsProgMem
 			);
 		
@@ -84,10 +84,10 @@ public:
 				int16_t loc_x, int16_t loc_y,
 				int16_t img_w, int16_t img_h,
 				const uint8_t* blackBitMap,
-				size_t blackBitMapSize,
+				uint32_t blackBitMapSize,
 				bool blackBitMapIsProgMem,
 				const uint8_t* colorBitMap,
-				size_t colorBitMapSize,
+				uint32_t colorBitMapSize,
 				bool colorBitMapIsProgMem
 			);
 

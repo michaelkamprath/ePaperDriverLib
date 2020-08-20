@@ -9,6 +9,9 @@ void setup() {
 	device = new ePaperDisplay( CFAP400300A0_420, D1, D2, D3, D8 );
 #elif defined ( ESP32 )
 	device = new ePaperDisplay( CFAP400300A0_420, 21, 2, 4, 5 );
+#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
+	// assume using MightyCore for the ATmega1284
+	device = new ePaperDisplay( CFAP400300A0_420, PIN_PB1, PIN_PB2, PIN_PB3, PIN_PB4 );
 #else
 	device = new ePaperDisplay( CFAP400300A0_420, 3, 4, 5, 10 );
 #endif

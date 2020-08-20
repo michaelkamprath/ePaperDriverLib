@@ -8,6 +8,9 @@ ePaperDisplay *device;
 void setup() {
 #if defined( ESP8266 )
 	device = new ePaperDisplay( CFAP104212E0_0213, D1, D2, D3, D8 );
+#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
+	// assume using MightyCore for the ATmega1284
+	device = new ePaperDisplay( CFAP104212E0_0213, PIN_PB1, PIN_PB2, PIN_PB3, PIN_PB4 );
 #else
 	device = new ePaperDisplay( CFAP104212E0_0213, 3, 4, 5, 10 );
 #endif
