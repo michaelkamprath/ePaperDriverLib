@@ -278,55 +278,71 @@ void ePaperCanvas::fillScreen(uint16_t color)
 
 void ePaperCanvas::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 	if (getRotation() == 0) {
-		drawFastRawVLine(x, y, h, color);
+		drawFastRawVLine(x, y, h, (ePaperColorType)color);
 	} else if (getRotation() == 1) {
 		int16_t t = x;
 		x = WIDTH - 1 - y;
 		y = t;
-		x -= h;
-		drawFastRawHLine(x, y, h, color);
+		x -= h - 1;
+		drawFastRawHLine(x, y, h, (ePaperColorType)color);
 	} else if (getRotation() == 2) {
 		x = WIDTH - 1 - x;
       	y = HEIGHT - 1 - y;
       	
-      	y -= h;
-      	drawFastRawVLine(x, y, h, color);
+      	y -= h - 1;
+      	drawFastRawVLine(x, y, h, (ePaperColorType)color);
 	} else if (getRotation() == 3) {
 		int16_t t = x;
 		x = y;
 		y = HEIGHT - 1 - t;
-		drawFastRawHLine(x, y, h, color);
+		drawFastRawHLine(x, y, h, (ePaperColorType)color);
 	} else {
 		this->Adafruit_GFX::drawFastVLine(x, y, h, color);
 	}
 }
 
 void ePaperCanvas::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+	if ((x < 0)||(x >= width())||(y < 0)||(y >= height())) {
+		return;
+	}
+	
+	if (x + w > width()) {
+		w = width() - x;
+	} else if (w < 0) {
+		// convert negative widths to their postive equivalent
+		w *= -1;
+		x -= w - 1;		
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+	}
+
 	if (getRotation() == 0) {
-		drawFastRawHLine(x, y, w, color);
+		drawFastRawHLine(x, y, w, (ePaperColorType)color);
 	} else if (getRotation() == 1) {
 		int16_t t = x;
 		x = WIDTH - 1 - y;
 		y = t;
-		drawFastRawVLine(x, y, w, color);
+		drawFastRawVLine(x, y, w, (ePaperColorType)color);
 	} else if (getRotation() == 2) {
 		x = WIDTH - 1 - x;
       	y = HEIGHT - 1 - y;
       	
-      	x -= w;
-      	drawFastRawHLine(x, y, w, color);
+      	x -= w - 1;
+      	drawFastRawHLine(x, y, w, (ePaperColorType)color);
 	} else if (getRotation() == 3) {
 		int16_t t = x;
 		x = y;
 		y = HEIGHT - 1 - t;
-		y -= w;
-		drawFastRawVLine(x, y, w, color);
+		y -= w - 1;
+		drawFastRawVLine(x, y, w, (ePaperColorType)color);
 	} else {
 		this->Adafruit_GFX::drawFastHLine(x, y, w, color);
 	}
 }
 
-void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, ePaperColorType color) {
 	// should not be called for inverse colors
 	if ((color == ePaper_INVERSE1)||(color == ePaper_INVERSE2)||(color == ePaper_INVERSE3)) {
 		return;
@@ -384,7 +400,7 @@ void ePaperCanvas::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 	}
 }
 
-void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, ePaperColorType color)
 {
 	// should not be called for inverse colors
 	if ((color == ePaper_INVERSE1)||(color == ePaper_INVERSE2)||(color == ePaper_INVERSE3)) {

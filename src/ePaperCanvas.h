@@ -31,8 +31,8 @@ private:
 	const ePaperColorMode 	_mode;
 	
 	void getBitSettingsForColor(uint16_t color, bool& blackBit, bool& colorBit );
-	void drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-	void drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+	void drawFastRawHLine(int16_t x, int16_t y, int16_t w, ePaperColorType color);
+	void drawFastRawVLine(int16_t x, int16_t y, int16_t h, ePaperColorType color);
 	
 protected:
 	ePaperColorMode getColorMode(void) const		{ return _mode; }
@@ -55,7 +55,7 @@ public:
 	//
 	
 	void drawPixel(int16_t x, int16_t y, ePaperColorType color);
-	virtual void drawPixel(int16_t x, int16_t y, uint16 color)
+	virtual void drawPixel(int16_t x, int16_t y, uint16_t color)
 											{ this->drawPixel(x, y, (ePaperColorType)color); }
 	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);

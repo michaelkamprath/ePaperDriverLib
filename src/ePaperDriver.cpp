@@ -110,7 +110,8 @@ void ePaperDisplay::waitForReady(void) const
 	DEBUG_PRINT(busyValue);
 	DEBUG_PRINT(F(" : ."));
 	
-	sendCommand(0x71);
+// 	uint8_t cmd = 0x71;
+// 	sendCommand(cmd);
 	while (busyValue == digitalRead(_deviceReadyPin)) {
 		yield();
 		if (_waitCallbackFunc) _waitCallbackFunc();
