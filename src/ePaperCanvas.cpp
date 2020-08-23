@@ -471,7 +471,7 @@ void ePaperCanvas::drawFastRawHLine(int16_t x, int16_t y, int16_t w, ePaperColor
 		uint8_t colorByte = colorBitOn ? 0xFF : 0x00;
 	
 		// set the remaining whole bytes
-		for (int32_t i = start_buffer_index;
+		for (uint32_t i = start_buffer_index;
 				i < start_buffer_index + remainingWholeBytes;
 				i++
 		) {
